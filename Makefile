@@ -50,7 +50,7 @@ ifeq ("$(VIRTUAL_ENV)","")
 	exit 1
 endif	
 
-DB_FILE = ${PWD}/deploy/data/database/database.db
+DB_FILE = /data/database/database.db
 
 
 # Setup commands

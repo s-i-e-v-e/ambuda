@@ -54,9 +54,6 @@ function init_vidyut_data ()
     return 0
 }
 
-# Git required only for this run. Keeping git here to curb docker image size.
-apt-get -qq update && apt-get -qq install -y git wget unzip > /dev/null
-
 # Initialize SQLite database
 python scripts/initialize_database.py && echo "Database set up complete." || exit 1
 

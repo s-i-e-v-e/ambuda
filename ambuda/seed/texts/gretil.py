@@ -21,7 +21,7 @@ class Spec:
 
 REPO = "https://github.com/ambuda-org/gretil.git"
 PROJECT_DIR = Path(__file__).resolve().parents[3]
-DATA_DIR = PROJECT_DIR / "data" / "ambuda-gretil"
+DATA_DIR = Path("/data/ambuda-gretil")
 #: Slug to use for texts that have only one section.
 
 ALLOW = [

@@ -13,8 +13,10 @@ js-coverage-report/
 __pycache__
 
 # Python and Node dependencies
+venv/
 env/
 node_modules/
+.node_modules/
 
 # Development database
 *.db

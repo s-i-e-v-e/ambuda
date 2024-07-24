@@ -13,7 +13,7 @@ import ambuda.database as db
 
 load_dotenv()
 PROJECT_DIR = Path(__file__).parent.parent.parent
-CACHE_DIR = PROJECT_DIR / "data" / "download-cache"
+CACHE_DIR = Path("/data/download-cache")
 
 
 @dataclass

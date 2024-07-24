@@ -45,11 +45,11 @@ cat << EOF > .env
 
 # Flask parameters
 FLASK_ENV=development
-FLASK_UPLOAD_FOLDER="$(pwd)/deploy/data/file-uploads"
+FLASK_UPLOAD_FOLDER="/data/uploads"
 SECRET_KEY="insecure development secret key"
 
 # Database
-SQLALCHEMY_DATABASE_URI="sqlite:///$(pwd)/deploy/data/database/database.db"
+SQLALCHEMY_DATABASE_URI="sqlite:///data/database/database.db"
 
 # OCR and BOT credentials
 AMBUDA_BOT_PASSWORD="insecure bot password"

@@ -92,4 +92,5 @@ def create_from_scratch(engine, slug: str, title: str, generator):
                     {"dictionary_id": dictionary.id, "key": key, "value": value}
                 )
             conn.execute(ins, items)
+            conn.commit()
             logging.info(BATCH_SIZE * (i + 1))

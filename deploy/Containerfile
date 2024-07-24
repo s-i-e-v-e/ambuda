@@ -1,0 +1,72 @@
+#FROM alpine:latest
+FROM alpine:edge as base
+RUN echo "************* [0] RUNNING BASE *****************"
+RUN apk update && apk add --no-cache python3 py3-greenlet libxml2 libxslt libjpeg celery redis net-tools iproute2 ncdu which openssh libcurl unzip libssl3 ca-certificates openrc
+RUN apk add --virtual build-deps build-base linux-headers swig python3-dev musl-dev jpeg-dev zlib-dev poetry grep git wget curl nodejs npm
+WORKDIR /
+RUN mkdir /app
+
+
+FROM base as nodejs
+RUN echo "************* [0:1] RUNNING NODE *****************"
+WORKDIR /app
+RUN npm install -D tailwindcss esbuild @tailwindcss/typography concurrently
+
+
+FROM nodejs as npx
+RUN echo "************* [1:3] RUNNING NPX *****************"
+#RUN git clone https://github.com/s-i-e-v-e/ambuda /app
+#RUN git switch podman
+COPY ./ /app
+WORKDIR /app
+RUN npx tailwindcss -i /app/ambuda/static/css/style.css -o /app/ambuda/static/gen/style.css --minify
+RUN npx esbuild /app/ambuda/static/js/main.js --outfile=/app/ambuda/static/gen/main.js --bundle --minify
+
+
+FROM base as python
+RUN echo "************* [0:2] RUNNING PYTHON *****************"
+ENV PYTHONFAULTHANDLER=1 \
+  PYTHONUNBUFFERED=1 \
+  PYTHONHASHSEED=random \
+  PIP_NO_CACHE_DIR=1 \
+  PIP_DISABLE_PIP_VERSION_CHECK=1 \
+  PIP_DEFAULT_TIMEOUT=100
+WORKDIR /app
+COPY ./pyproject.toml /app
+RUN python -m venv /venv
+ENV PATH="/venv/bin:/bin:$PATH"
+RUN source /venv/bin/activate
+RUN python -m pip install --upgrade pip
+RUN pip install PyMuPDFb
+RUN pip install tzdata
+RUN pip install poetry-plugin-export
+RUN poetry export --without-hashes --with dev -f requirements.txt -o requirements.txt
+RUN cat requirements.txt | grep -v 'greenlet' | sed 's/==.*//' > r2.txt
+RUN mv r2.txt requirements.txt
+RUN pip install --no-cache-dir --no-deps -r requirements.txt
+RUN echo "************* DONE: PYTHON PACKAGES *****************"
+
+RUN echo "************* [2:4] RUNNING TRANSLATIONS *****************"
+COPY --from=npx /app /app
+WORKDIR /app
+# Install all i18n files
+RUN python /app/ambuda/scripts/fetch_i18n_files.py
+RUN pybabel compile -d /app/ambuda/translations -f
+
+#FROM scratch as final
+FROM python
+#RUN echo "************* [*:5] RUNNING SCRATCH *****************"
+WORKDIR /
+#COPY --from=base /sbin /sbin
+#COPY --from=base /bin /bin
+#COPY --from=base /lib /lib
+#COPY --from=base /usr/bin /usr/bin
+#COPY --from=base /usr/lib /usr/lib
+#COPY --from=base /var/lib /var/lib
+#COPY --from=base /etc /etc
+#COPY --from=python /venv /venv
+COPY --from=npx /app /app
+#RUN rm -rf /app/node_modules
+RUN mkdir /data
+RUN mkdir /data/database
+RUN echo "************* PODMAN IMAGE BUILT *****************"

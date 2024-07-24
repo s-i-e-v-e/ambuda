@@ -30,8 +30,7 @@ def get_kanda_and_sarga(kanda_slug_map, section: dcs.Section) -> tuple[str, str]
 
 def iter_sections():
     text_path = (
-        Path(__file__).parent.parent.parent.parent
-        / "data"
+        Path("/data")
         / "dcs-raw"
         / "files"
         / "Rāmāyaṇa"

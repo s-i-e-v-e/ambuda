@@ -8,7 +8,7 @@ from ambuda.seed.utils.data_utils import create_db
 
 REPO = "https://github.com/ambuda-org/dcs.git"
 PROJECT_DIR = Path(__file__).resolve().parents[2]
-DATA_DIR = PROJECT_DIR / "data" / "ambuda-dcs"
+DATA_DIR = Path("/data/ambuda-dcs")
 
 
 class UpdateError(Exception):

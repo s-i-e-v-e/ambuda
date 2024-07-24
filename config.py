@@ -157,7 +157,7 @@ class UnitTestConfig(BaseConfig):
     TESTING = True
     SECRET_KEY = "insecure unit test secret"
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
-    UPLOAD_FOLDER = _make_path(Path(__file__).parent / "data" / "file-uploads")
+    UPLOAD_FOLDER = "/data/uploads"
 
     #: Logger setup
     LOG_LEVEL = logging.DEBUG

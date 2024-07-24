@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: deploy
+spec:
+  restartPolicy: Never
+  containers:
+    - name: ambuda
+      image: ${AMBUDA_IMAGE}
+      ports:
+        - containerPort: 5000
+          hostPort: ${AMBUDA_HOST_PORT}
+          hostIP: "${AMBUDA_HOST_IP}"
+          protocol: TCP
+      resources: { }
+      securityContext:
+        allowPrivilegeEscalation: true
+        capabilities: { }
+        privileged: false
+        readOnlyRootFilesystem: false
+        seLinuxOptions: { }
+      workingDir: /app
+      command: [ "/app/ar", "container", "init" ]
+      volumeMounts:
+        - mountPath: /data
+          name: data
+#        - mountPath: /app/ambuda/static
+#          name: static
+  volumes:
+    - name: data
+      hostPath:
+        path: /data/ambuda
+        type: Directory
+#    - name: static
+#      hostPath:
+#        path: ${PWD}/ambuda/static
+#        type: Directory
+status: { }

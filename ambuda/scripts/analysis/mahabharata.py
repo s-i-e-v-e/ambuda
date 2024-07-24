@@ -31,8 +31,7 @@ TITLE_MAP = {
 
 def iter_sections():
     text_path = (
-        Path(__file__).parent.parent.parent.parent
-        / "data"
+        Path("/data")
         / "dcs-raw"
         / "files"
         / "Mahābhārata"

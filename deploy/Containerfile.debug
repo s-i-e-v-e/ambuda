@@ -1,0 +1,11 @@
+FROM alpine:edge
+#RUN mkdir -p /app
+#WORKDIR /app
+RUN apk update && apk add --no-cache ncdu
+
+#COPY ./ /app
+#RUN /bin/echo $PATH
+#RUN python3 -m venv /venv
+#ENV PATH="/venv/bin:/bin:$PATH"
+#RUN source /venv/bin/activate
+#CMD ["/app/ar", "container", "start"]

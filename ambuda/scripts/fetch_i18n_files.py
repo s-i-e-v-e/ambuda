@@ -4,7 +4,7 @@ from pathlib import Path
 
 REPO = "https://github.com/ambuda-org/ambuda-i18n.git"
 PROJECT_DIR = Path(__file__).resolve().parents[2]
-DATA_DIR = PROJECT_DIR / "data" / "ambuda-i18n"
+DATA_DIR = Path("/tmp/ambuda-i18n")
 
 
 def fetch_git_repo(url: str, path: Path):

@@ -17,8 +17,7 @@ def log(*a):
 
 def iter_sections(dcs_text_name):
     text_path = (
-        Path(__file__).parent.parent.parent.parent
-        / "data"
+        Path("/data")
         / "dcs-raw"
         / "files"
         / f"{dcs_text_name}-all.conllu"

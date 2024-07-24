@@ -1,0 +1,13 @@
+#!/bin/sh
+if [ "$1" == "container" ]; then
+  source /venv/bin/activate
+  pip install PyYAML python-dotenv
+  shift
+  python `pwd`/ambuda-runner/yrunc.py $*
+else
+  python -m venv /tmp/venv
+  source /tmp/venv/bin/activate
+  python -m pip install --upgrade pip
+  pip install PyYAML python-dotenv requests
+  python `pwd`/ambuda-runner/yrunv.py $*
+fi
