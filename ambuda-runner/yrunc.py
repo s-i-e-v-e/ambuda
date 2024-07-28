@@ -8,6 +8,7 @@ import sys
 import db_initialize
 import vidyut_initialize
 import verify
+import code
 
 AMBUDA_CONTAINER_IP="AMBUDA_CONTAINER_IP"
 REDIS_PORT="REDIS_PORT"
@@ -55,7 +56,10 @@ def __main():
     cmd = util.xs_next(sys.argv, 'help')
     switch = {
         'init': __init,
-        'verify': verify.production,
+        'check': code.check,
+        'test': code.test,
+        'lint': code.lint,
+        'verify': verify.verify,
 
         'help': _yrun.help
     }
