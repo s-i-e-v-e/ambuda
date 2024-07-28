@@ -20,8 +20,9 @@ class Spec:
 
 
 REPO = "https://github.com/ambuda-org/gretil.git"
-PROJECT_DIR = Path(__file__).resolve().parents[3]
-DATA_DIR = Path("/data/ambuda-gretil")
+
+from ambuda.paths import GRETIL_DATA_DIR as DATA_DIR
+
 #: Slug to use for texts that have only one section.
 
 ALLOW = [

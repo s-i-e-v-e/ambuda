@@ -7,9 +7,7 @@ import ambuda.database as db
 from ambuda.seed.utils.data_utils import create_db
 
 REPO = "https://github.com/ambuda-org/dcs.git"
-PROJECT_DIR = Path(__file__).resolve().parents[2]
-DATA_DIR = Path("/data/ambuda-dcs")
-
+from ambuda.paths import DCS_DATA_DIR as DATA_DIR
 
 class UpdateError(Exception):
     pass

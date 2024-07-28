@@ -3,7 +3,6 @@
 
 from collections.abc import Iterator
 from dataclasses import dataclass
-from pathlib import Path
 
 from dotenv import load_dotenv
 from indic_transliteration import sanscript
@@ -12,9 +11,6 @@ from sqlalchemy.orm import Session
 import ambuda.database as db
 
 load_dotenv()
-PROJECT_DIR = Path(__file__).parent.parent.parent
-CACHE_DIR = Path("/data/download-cache")
-
 
 @dataclass
 class Line:

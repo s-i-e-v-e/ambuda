@@ -11,6 +11,8 @@ import ambuda.database as db
 import ambuda.scripts.analysis.dcs_utils as dcs
 from ambuda.seed.utils.data_utils import create_db
 
+from ambuda.paths import DCS_RAW_FILE_DIR
+
 TITLE_MAP = {
     "Rām, Bā": "1",
     "Rām, Ay": "2",
@@ -30,9 +32,7 @@ def get_kanda_and_sarga(kanda_slug_map, section: dcs.Section) -> tuple[str, str]
 
 def iter_sections():
     text_path = (
-        Path("/data")
-        / "dcs-raw"
-        / "files"
+        DCS_RAW_FILE_DIR
         / "Rāmāyaṇa"
     )
     for section_path in sorted(text_path.iterdir()):

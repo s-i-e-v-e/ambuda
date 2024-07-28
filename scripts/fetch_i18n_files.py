@@ -3,9 +3,6 @@ import subprocess
 from pathlib import Path
 
 REPO = "https://github.com/ambuda-org/ambuda-i18n.git"
-PROJECT_DIR = Path(__file__).resolve().parents[2]
-DATA_DIR = Path("/tmp/ambuda-i18n")
-
 
 def fetch_git_repo(url: str, path: Path):
     """Fetch the latest version of the given repo."""
@@ -27,11 +24,13 @@ def copy_translation_files(src_dir: Path, dest_dir: Path):
 
 
 def main():
-    src_dir = DATA_DIR / "translations"
-    dest_dir = PROJECT_DIR / "ambuda" / "translations"
+    PROJECT_DIR = Path(__file__).resolve().parents[2]
+    git_dir = Path("/tmp") / "ambuda-i18n"
+    src_dir = git_dir / "translations"
+    dest_dir = Path("/app") / "ambuda" / "translations"
     dest_dir.mkdir(parents=True, exist_ok=True)
 
-    fetch_git_repo(REPO, DATA_DIR)
+    fetch_git_repo(REPO, git_dir)
     compile_translations(src_dir)
     copy_translation_files(src_dir, dest_dir)
     print("Done.")

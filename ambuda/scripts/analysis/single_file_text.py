@@ -10,6 +10,7 @@ import ambuda.database as db
 import ambuda.scripts.analysis.dcs_utils as dcs
 from ambuda.seed.utils.data_utils import create_db
 
+from ambuda.paths import DCS_RAW_FILE_DIR
 
 def log(*a):
     print(*a)
@@ -17,9 +18,7 @@ def log(*a):
 
 def iter_sections(dcs_text_name):
     text_path = (
-        Path("/data")
-        / "dcs-raw"
-        / "files"
+        DCS_RAW_FILE_DIR
         / f"{dcs_text_name}-all.conllu"
     )
     yield from dcs.parse_file(text_path)

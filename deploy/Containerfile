@@ -50,7 +50,7 @@ RUN echo "************* [2:4] RUNNING TRANSLATIONS *****************"
 COPY --from=npx /app /app
 WORKDIR /app
 # Install all i18n files
-RUN python /app/ambuda/scripts/fetch_i18n_files.py
+RUN python /app/scripts/fetch_i18n_files.py
 RUN pybabel compile -d /app/ambuda/translations -f
 
 #FROM scratch as final

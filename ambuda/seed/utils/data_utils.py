@@ -8,8 +8,7 @@ from sqlalchemy import create_engine
 
 import config
 from ambuda import database as db
-from ambuda.seed.utils.itihasa_utils import CACHE_DIR
-
+from ambuda.paths import CACHE_DIR
 
 def fetch_text(url: str, read_from_cache: bool = True) -> str:
     """Fetch text data against a simple cache.
