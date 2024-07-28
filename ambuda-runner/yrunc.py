@@ -5,6 +5,8 @@
 import util
 import _yrun
 import sys
+import db_initialize
+import vidyut_initialize
 
 AMBUDA_CONTAINER_IP="AMBUDA_CONTAINER_IP"
 REDIS_PORT="REDIS_PORT"
@@ -35,18 +37,20 @@ def __start():
 def __init():
     print('podman: INIT')
 
-    util.run(['sh', '/app/scripts/initialize_data.sh'])
+    # Initialize SQLite database
+    db_initialize.run()
+
+    # Initialize Vidyut data
+    vidyut_initialize.run()
+
     __start()
 
 
 def __main():
-    print(sys.argv)
     util.set_envars_from('/data/container.env', 'deploy/default.container.env')
     del sys.argv[0]
 
     cmd = util.xs_next(sys.argv, 'help')
-
-    print(cmd)
     switch = {
         'init': __init,
 

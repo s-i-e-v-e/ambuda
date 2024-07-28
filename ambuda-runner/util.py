@@ -14,7 +14,7 @@ def set_env(k, v):
 
 
 def get_env(k):
-    return os.environ[k]
+    return os.environ[k] if k in os.environ else None
 
 
 def set_envars_from(f, default):
@@ -57,10 +57,19 @@ def cwd():
 
 
 def run(xs):
-    subprocess.run(xs)
+    return subprocess.run(xs).returncode == 0
 
 def rm(f):
     os.remove(f)
+
+
+def file_exists(f):
+    return os.path.isfile(f)
+
+
+def extract_file_name(f):
+    xs = f.split(os.sep)
+    return xs.pop()
 
 def xs_next(xs, default):
     return xs[0] if len(xs) > 0 else default

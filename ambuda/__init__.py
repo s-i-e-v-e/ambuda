@@ -15,7 +15,7 @@ from flask_babel import Babel, pgettext
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sqlalchemy import exc
 
-import config
+from ambuda import config
 from ambuda import admin as admin_manager
 from ambuda import auth as auth_manager
 from ambuda import checks, filters, queries

@@ -6,9 +6,8 @@ import zipfile
 import requests
 from sqlalchemy import create_engine
 
-import config
 from ambuda import database as db
-from ambuda.paths import CACHE_DIR
+import ambuda.system
 
 def fetch_text(url: str, read_from_cache: bool = True) -> str:
     """Fetch text data against a simple cache.
@@ -50,10 +49,10 @@ def fetch_bytes(url: str, read_from_cache: bool = True) -> bytes:
     :param read_from_cache: if true, check the cache before fetching over the
         network.
     """
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    ambuda.system.CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
     code = hashlib.sha256(url.encode()).hexdigest()
-    path = CACHE_DIR / code
+    path = ambuda.system.CACHE_DIR / code
 
     if path.exists() and read_from_cache:
         return path.read_bytes()
@@ -76,9 +75,7 @@ def unzip_and_read(zip_bytes: bytes, filepath: str) -> str:
 
 def create_db():
     """Create a SQLAlchemy database engine."""
-    flask_env = os.environ["FLASK_ENV"]
-    conf = config.load_config_object(flask_env)
-    engine = create_engine(conf.SQLALCHEMY_DATABASE_URI)
+    engine = create_engine(ambuda.system.sql_uri())
 
     db.Base.metadata.create_all(engine)
     return engine

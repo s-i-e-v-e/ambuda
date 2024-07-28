@@ -1,10 +1,10 @@
 import shutil
 import subprocess
 from pathlib import Path
-
+import util
 REPO = "https://github.com/ambuda-org/ambuda-i18n.git"
 
-def fetch_git_repo(url: str, path: Path):
+def __fetch_git_repo(url: str, path: Path):
     """Fetch the latest version of the given repo."""
     if not path.exists():
         subprocess.run(f"mkdir -p {path}", shell=True)
@@ -15,26 +15,24 @@ def fetch_git_repo(url: str, path: Path):
     subprocess.call("git reset --hard origin/main", shell=True, cwd=path)
 
 
-def compile_translations(path: Path):
-    subprocess.call(f"pybabel compile -d {path}", shell=True, stderr=subprocess.DEVNULL)
+def __compile_translations(path: Path):
+    subprocess.call(f"pybabel compile -d {path} -f", shell=True, stderr=subprocess.DEVNULL)
 
 
-def copy_translation_files(src_dir: Path, dest_dir: Path):
+def __copy_translation_files(src_dir: Path, dest_dir: Path):
     shutil.copytree(str(src_dir), str(dest_dir), dirs_exist_ok=True)
 
 
-def main():
-    PROJECT_DIR = Path(__file__).resolve().parents[2]
-    git_dir = Path("/tmp") / "ambuda-i18n"
+def generate():
+    git_dir = Path("/tmp/ambuda-i18n")
+    __fetch_git_repo(REPO, git_dir)
+
     src_dir = git_dir / "translations"
-    dest_dir = Path("/app") / "ambuda" / "translations"
-    dest_dir.mkdir(parents=True, exist_ok=True)
+    __compile_translations(src_dir)
 
-    fetch_git_repo(REPO, git_dir)
-    compile_translations(src_dir)
-    copy_translation_files(src_dir, dest_dir)
+    dest_dir = "/app/ambuda/translations"
+
+    util.make_dir(dest_dir)
+    __copy_translation_files(src_dir, dest_dir)
+
     print("Done.")
-
-
-if __name__ == "__main__":
-    main()

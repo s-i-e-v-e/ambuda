@@ -3,13 +3,13 @@
 #
 
 import util
-import os
 AMBUDA_VERSION="AMBUDA_VERSION"
 AMBUDA_IMAGE="AMBUDA_IMAGE"
 AMBUDA_IMAGE_LATEST="AMBUDA_IMAGE_LATEST"
 AMBUDA_HOST_IP="AMBUDA_HOST_IP"
 AMBUDA_HOST_PORT="AMBUDA_HOST_PORT"
 
+AMBUDA_CONTAINER_NAME="deploy-ambuda"
 def __env():
     util.set_envars_from('/data/ambuda/builder.env', 'deploy/default.builder.env')
     image_name = f"ambuda-release:{util.get_env(AMBUDA_VERSION)}-{util.get_git_sha()}"
@@ -42,7 +42,11 @@ def stage():
     util.run(['podman', 'kube', 'play', pod_file])
 
     print(f"Host: {util.get_env(AMBUDA_HOST_IP)}:{util.get_env(AMBUDA_HOST_PORT)}")
-    util.run(['podman', 'logs', '-f', 'deploy-ambuda'])
+    util.run(['podman', 'logs', '-f', AMBUDA_CONTAINER_NAME])
     
 def inspect():
-    util.run(['podman', 'inspect', 'deploy-ambuda', '-f', '{{ .NetworkSettings.IPAddress }} {{ .NetworkSettings.Ports }}'])
+    util.run(['podman', 'inspect', AMBUDA_CONTAINER_NAME, '-f', '{{ .NetworkSettings.IPAddress }} {{ .NetworkSettings.Ports }}'])
+
+
+def kill():
+    util.run(['podman', 'kill', AMBUDA_CONTAINER_NAME])

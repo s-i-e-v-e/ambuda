@@ -1,17 +1,16 @@
-#! /usr/bin/python3
-"""Initializes the database by creating all tables.
-
-This module is called from `scripts/initialize_data.sh`.
-
-"""
+#
+# Initializes the database by creating all tables.
+#
 
 import subprocess
 from pathlib import Path
 
-from dotenv import load_dotenv
 from sqlalchemy import create_engine
 
-import config
+import sys
+sys.path.append('/app')
+sys.path.append('/app/ambuda')
+import ambuda.system
 from ambuda import database as db
 from ambuda.seed import dcs, lookup, texts
 
@@ -20,16 +19,6 @@ from ambuda.seed.dictionaries import monier  # noqa
 
 # TODO: need to FIX
 from ambuda.seed.texts import gretil  # noqa
-
-
-def get_sqlalchemy_uri():
-    """parse sql alchemy db uri from config file"""
-
-    # TODO: don't hard code to dev.
-    conf = config.load_config_object("development")
-    sql_uri = conf.SQLALCHEMY_DATABASE_URI
-    return sql_uri
-
 
 def get_db_file_path(sql_uri):
     """get file path from sql alchemy uri"""
@@ -71,8 +60,8 @@ def init_database(sql_uri, db_file_path):
 
 def alembic_migrations():
     try:
-        subprocess.run(["/venv/bin/alembic", "ensure_version"])
-        subprocess.run(["/venv/bin/alembic", "stamp", "head"])
+        subprocess.run(["alembic", "ensure_version"])
+        subprocess.run(["alembic", "stamp", "head"])
         print("Success! Database version check completed.")
     except subprocess.CalledProcessError as mig_ex:
         print(f"Error processing alembic commands - {mig_ex}")
@@ -87,7 +76,7 @@ def load_database(db_file_path):
 
     try:
         run_module(lookup)
-        subprocess.run(["/venv/bin/alembic", "upgrade", "head"])
+        subprocess.run(["alembic", "upgrade", "head"])
         print(f"Success! Database is ready at {db_file_path}")
     except Exception as load_ex:
         print(f"Error: Failed to load database. Error: {load_ex}")
@@ -100,8 +89,7 @@ def run():
     Return value is boolean as the caller is a shell script.
     """
 
-    load_dotenv()
-    sql_uri = get_sqlalchemy_uri()
+    sql_uri = ambuda.system.sql_uri()
     try:
         db_file_path = get_db_file_path(sql_uri)
     except Exception as err:
@@ -127,8 +115,5 @@ def run():
                 f"Error! Failed to initialize database at {db_file_path}. Error: {init_ex}"
             )
             return False
+    print("Database set up complete.")
     return True
-
-
-if __name__ == "__main__":
-    run()
