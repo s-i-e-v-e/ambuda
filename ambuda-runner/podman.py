@@ -11,7 +11,7 @@ AMBUDA_HOST_IP="AMBUDA_HOST_IP"
 AMBUDA_HOST_PORT="AMBUDA_HOST_PORT"
 
 def __env():
-    util.set_envars_from('deploy/env.builder')
+    util.set_envars_from('/data/ambuda/builder.env', 'deploy/default.builder.env')
     image_name = f"ambuda-release:{util.get_env(AMBUDA_VERSION)}-{util.get_git_sha()}"
     util.set_env(AMBUDA_IMAGE, image_name)
     util.set_env(AMBUDA_IMAGE_LATEST, "ambuda-release:latest")

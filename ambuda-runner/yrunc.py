@@ -41,7 +41,7 @@ def __init():
 
 def __main():
     print(sys.argv)
-    util.set_envars_from('deploy/env.container')
+    util.set_envars_from('/data/container.env', 'deploy/default.container.env')
     del sys.argv[0]
 
     cmd = util.xs_next(sys.argv, 'help')

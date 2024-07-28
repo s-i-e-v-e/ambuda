@@ -17,9 +17,10 @@ def get_env(k):
     return os.environ[k]
 
 
-def set_envars_from(f):
-    dotenv.load_dotenv(f)
-    d = dotenv.dotenv_values(f)
+def set_envars_from(f, default):
+    ef = f if os.path.isfile(f) else default
+    dotenv.load_dotenv(ef)
+    d = dotenv.dotenv_values(ef)
     for k, v in d.items():
         os.environ[k] = v
 
