@@ -11,7 +11,7 @@ AMBUDA_HOST_PORT="AMBUDA_HOST_PORT"
 
 AMBUDA_CONTAINER_NAME="deploy-ambuda"
 def __env():
-    util.set_envars_from('/data/ambuda/builder.env', 'deploy/default.builder.env')
+    util.set_envars_from('/data/ambuda/host.env', 'deploy/default.host.env')
     image_name = f"ambuda-release:{util.get_env(AMBUDA_VERSION)}-{util.get_git_sha()}"
     util.set_env(AMBUDA_IMAGE, image_name)
     util.set_env(AMBUDA_IMAGE_LATEST, "ambuda-release:latest")
@@ -58,3 +58,10 @@ def inspect(args):
 
 def kill(args):
     util.run(['podman', 'kill', AMBUDA_CONTAINER_NAME])
+
+
+def destroy(args):
+    util.run(['podman', 'image', 'rm', '-a', '-f'])
+    #kill(args)
+    #util.run(['podman', 'pod', 'rm', '-a', '-f'])
+    #util.run(['podman', 'container', 'rm', '-a', '-f'])

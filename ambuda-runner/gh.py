@@ -78,7 +78,7 @@ def __get_release_pr_open_workflow():
         },
         'jobs': {
             'build': __remote_job('build'),
-            'stage': __remote_job("stage", needs = "build"),
+            'stage': __remote_job("stage", needs="build"),
             'pr_commented': __job_pr_comment("build")
         }
     }
@@ -125,7 +125,7 @@ def __dump_workflow(file, data):
     with open(file_name, 'w') as yaml_file:
         yaml_file.write(doc)
 
-def gh_generate_workflows():
+def gh_generate_workflows(args):
     __dump_workflow('rel-pr-merged.yml', __get_release_pr_merged_workflow())
     __dump_workflow('rel-pr-open.yml', __get_release_pr_open_workflow())
     __dump_workflow('external-pr-open.yml', __get_external_pr_open_workflow())
