@@ -28,7 +28,7 @@ def __main():
     #     pass
 
     switch = {
-        #'gh': gh_generate_workflows,
+        'gh': gh_generate_workflows,
 
         'build': podman.build, # build image
         'stage': podman.stage,  # stage container
@@ -36,7 +36,7 @@ def __main():
 
         'help': _yrun.help
     }
-    f = switch.get(cmd, _yrun.none)
+    f = switch.get(cmd, _yrun.help)
     f()
 
 __main()
