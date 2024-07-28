@@ -23,7 +23,7 @@ def __copy_translation_files(src_dir: Path, dest_dir: Path):
     shutil.copytree(str(src_dir), str(dest_dir), dirs_exist_ok=True)
 
 
-def generate():
+def generate(args):
     git_dir = Path("/tmp/ambuda-i18n")
     __fetch_git_repo(REPO, git_dir)
 

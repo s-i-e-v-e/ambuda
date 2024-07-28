@@ -4,6 +4,6 @@
 
 from ambuda.config import create_config_only_app
 
-def production():
+def production(args):
     # Fails if config is malformed.
     app = create_config_only_app("production")

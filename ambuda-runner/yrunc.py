@@ -7,6 +7,7 @@ import _yrun
 import sys
 import db_initialize
 import vidyut_initialize
+import verify
 
 AMBUDA_CONTAINER_IP="AMBUDA_CONTAINER_IP"
 REDIS_PORT="REDIS_PORT"
@@ -34,11 +35,12 @@ def __start():
                   ])
 
 
-def __init():
+def __init(args):
     print('podman: INIT')
+    seed_type = util.next_arg_pair(args)
 
     # Initialize SQLite database
-    db_initialize.run()
+    db_initialize.run(seed_type[1] if seed_type[0] == '--seed' else None)
 
     # Initialize Vidyut data
     vidyut_initialize.run()
@@ -53,11 +55,12 @@ def __main():
     cmd = util.xs_next(sys.argv, 'help')
     switch = {
         'init': __init,
+        'verify': verify.production,
 
         'help': _yrun.help
     }
     f = switch.get(cmd, _yrun.none)
-    f()
+    f(sys.argv)
 
 
 __main()

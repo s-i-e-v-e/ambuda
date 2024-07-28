@@ -72,7 +72,15 @@ def extract_file_name(f):
     return xs.pop()
 
 def xs_next(xs, default):
-    return xs[0] if len(xs) > 0 else default
+    x = xs[0] if len(xs) > 0 else default
+    if x:
+        del xs[0]
+    return x
+
+def next_arg_pair(xs):
+    a = xs_next(xs, None)
+    b = xs_next(xs, None) if a else None
+    return a, b
 
 def get_external_ip():
     x = subprocess.run(['/bin/ip', 'route', 'get', '1'], capture_output=True).stdout.decode('utf-8');

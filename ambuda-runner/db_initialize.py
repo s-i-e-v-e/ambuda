@@ -12,13 +12,8 @@ sys.path.append('/app')
 sys.path.append('/app/ambuda')
 import ambuda.system
 from ambuda import database as db
-from ambuda.seed import dcs, lookup, texts
-
-# TODO: need to FIX
-from ambuda.seed.dictionaries import monier  # noqa
-
-# TODO: need to FIX
-from ambuda.seed.texts import gretil  # noqa
+from ambuda.seed import lookup
+import seeding
 
 def get_db_file_path(sql_uri):
     """get file path from sql alchemy uri"""
@@ -38,7 +33,7 @@ def run_module(module_name):
     print(f'{"#"}' * 20)
 
 
-def init_database(sql_uri, db_file_path):
+def init_database(sql_uri, db_file_path, seed_type):
     """Initialize database"""
 
     print(f"Initializing database at {db_file_path}...")
@@ -47,10 +42,10 @@ def init_database(sql_uri, db_file_path):
     db.Base.metadata.create_all(engine)
 
     try:
-        run_module(lookup)
-        run_module(texts.gretil)
-        run_module(dcs)
-        run_module(monier)
+        if seed_type == 'all':
+            seeding.all()
+        else:
+            seeding.basic()
         alembic_migrations()
     except Exception as init_ex:
         print(f"Error: Failed to initialize database. Error: {init_ex}")
@@ -83,7 +78,7 @@ def load_database(db_file_path):
         raise load_ex
 
 
-def run():
+def run(seed_type):
     """
     Initialize db for fresh installs. Load db on restarts.
     Return value is boolean as the caller is a shell script.
@@ -101,19 +96,15 @@ def run():
         try:
             load_database(db_file_path)
         except Exception as load_ex:
-            print(
-                f"Error! Failed to load database from {db_file_path}. Error: {load_ex}"
-            )
+            print(f"Error! Failed to load database from {db_file_path}. Error: {load_ex}")
             return False
     else:
         # This is a new deployment.
         print("Initialize database")
         try:
-            init_database(sql_uri, db_file_path)
+            init_database(sql_uri, db_file_path, seed_type)
         except Exception as init_ex:
-            print(
-                f"Error! Failed to initialize database at {db_file_path}. Error: {init_ex}"
-            )
+            print(f"Error! Failed to initialize database at {db_file_path}. Error: {init_ex}")
             return False
     print("Database set up complete.")
     return True

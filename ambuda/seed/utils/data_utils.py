@@ -20,10 +20,10 @@ def fetch_text(url: str, read_from_cache: bool = True) -> str:
     :param read_from_cache: if true, check the cache before fetching over the
         network.
     """
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    ambuda.system.CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
     code = hashlib.sha256(url.encode()).hexdigest()
-    path = CACHE_DIR / code
+    path = ambuda.system.CACHE_DIR / code
 
     if path.exists() and read_from_cache:
         return path.read_text()

@@ -20,7 +20,7 @@ spec:
         readOnlyRootFilesystem: false
         seLinuxOptions: { }
       workingDir: /app
-      command: [ "/app/ar", "container", "init" ]
+      command: ${CMD}
       volumeMounts:
         - mountPath: /data
           name: data

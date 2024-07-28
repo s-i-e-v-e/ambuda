@@ -7,7 +7,6 @@ import util
 import podman
 from gh import gh_generate_workflows
 import i18n
-from remote import remote_exec
 import _yrun
 
 def __main():
@@ -29,6 +28,7 @@ def __main():
     #     pass
     switch = {
         'i18n': i18n.generate,
+
         'gh': gh_generate_workflows,
 
         'build': podman.build, # build image
@@ -39,7 +39,7 @@ def __main():
         'help': _yrun.help
     }
     f = switch.get(cmd, _yrun.help)
-    f()
+    f(sys.argv)
 
 # Generate Ambuda's technical documentation.
 # After the command completes, open "docs/_build/index.html".
