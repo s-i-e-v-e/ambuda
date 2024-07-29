@@ -168,6 +168,7 @@ def editor_guide():
 @bp.route("/create-project", methods=["GET", "POST"])
 @p2_required
 def create_project():
+    import unstd.config
     form = CreateProjectForm()
     if form.validate_on_submit():
         title = form.local_title.data
@@ -184,7 +185,7 @@ def create_project():
 
         # Create all directories for this project ahead of time.
         # FIXME(arun): push this further into the Celery task.
-        project_dir = Path(current_app.config["UPLOAD_FOLDER"]) / "projects" / slug
+        project_dir = Path(unstd.config.current.FLASK_UPLOAD_FOLDER) / "projects" / slug
         pdf_dir = project_dir / "pdf"
         page_image_dir = project_dir / "pages"
         pdf_dir.mkdir(parents=True, exist_ok=True)
@@ -199,7 +200,7 @@ def create_project():
             display_title=title,
             pdf_path=str(pdf_path),
             output_dir=str(page_image_dir),
-            app_environment=current_app.config["AMBUDA_ENVIRONMENT"],
+            app_environment=unstd.config.current.AMBUDA_ENVIRONMENT,
             creator_id=current_user.id,
         )
         return render_template(

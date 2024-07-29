@@ -1,41 +1,44 @@
-import util
+from typing import List
+
+import unstd.os
+
 
 def __js_test():
-    util.run(["npx", "jest"])
+    unstd.os.run(["npx", "jest"])
 
 
 def __js_test_coverage():
-    util.run(["npx", "jest", "--coverage"])
+    unstd.os.run(["npx", "jest", "--coverage"])
 
 
 def __py_test():
-    util.run(["pytest", "."])
+    unstd.os.run(["pytest", "."])
 
 
 def __py_test_coverage():
-    util.run(["pytest", "--cov=ambuda", "--cov-report=html", "test/"])
-    util.run(["coverage", "report", "--fail-under=80"])
+    unstd.os.run(["pytest", "--cov=ambuda", "--cov-report=html", "test/"])
+    unstd.os.run(["coverage", "report", "--fail-under=80"])
 
 
 def __js_check():
-    util.run(["npx", "tsc", "/app/ambuda/static/js/*.ts" "-noEmit"])
+    unstd.os.run(["npx", "tsc", "/app/ambuda/static/js/*.ts" "-noEmit"])
 
 
 def __js_lint():
-    util.run(["npx", "eslint", "--fix", "/app/ambuda/static/js/*", "--ext" ".js,.ts"])
+    unstd.os.run(["npx", "eslint", "--fix", "/app/ambuda/static/js/*", "--ext" ".js,.ts"])
 
 
 def __py_lint_check():
-    util.run(["black", ".", "--diff"])
+    unstd.os.run(["black", ".", "--diff"])
 
 
 def __py_lint():
     __py_lint_check()
-    util.run(["ruff", ".", "-fix"])
-    util.run(["black", "."])
+    unstd.os.run(["ruff", ".", "-fix"])
+    unstd.os.run(["black", "."])
 
 
-def check(args):
+def check(args: List[str]):
     print("Checking TYPES")
     __js_check()
 
@@ -46,8 +49,8 @@ def __test_with_coverage():
     __py_test_coverage()
 
 
-def test(args):
-    cv = util.xs_next(args, None)
+def test(args: List[str]):
+    cv = unstd.os.xs_next(args, None)
     if cv == '--coverage':
         __test_with_coverage()
     else:
@@ -56,7 +59,7 @@ def test(args):
         __py_test()
 
 
-def lint(args):
+def lint(args: List[str]):
     print("Linting JS + PY")
     __js_lint()
     __py_lint()

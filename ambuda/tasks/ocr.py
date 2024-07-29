@@ -12,7 +12,7 @@ from ambuda.tasks import app
 from ambuda.utils import google_ocr
 from ambuda.utils.assets import get_page_image_filepath
 from ambuda.utils.revisions import add_revision
-from ambuda.config import create_config_only_app
+from ambuda.flask_config import create_config_only_app
 
 
 def _run_ocr_for_page_inner(

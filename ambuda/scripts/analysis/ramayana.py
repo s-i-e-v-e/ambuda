@@ -11,7 +11,7 @@ import ambuda.database as db
 import ambuda.scripts.analysis.dcs_utils as dcs
 from ambuda.seed.utils.data_utils import create_db
 
-from ambuda.system import DCS_RAW_FILE_DIR
+from unstd.config import DCS_RAW_FILE_DIR
 
 TITLE_MAP = {
     "Rām, Bā": "1",

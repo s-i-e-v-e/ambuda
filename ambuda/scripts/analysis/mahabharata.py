@@ -7,7 +7,7 @@ from pathlib import Path
 import ambuda.scripts.analysis.dcs_utils as dcs
 from ambuda.scripts.analysis.ramayana import get_kanda_and_sarga, map_and_write
 
-from ambuda.system import DCS_RAW_FILE_DIR
+from unstd.config import DCS_RAW_FILE_DIR
 
 TITLE_MAP = {
     "MBh, 1": "1",

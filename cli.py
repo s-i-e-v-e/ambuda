@@ -81,7 +81,7 @@ def add_role(username, role):
 @click.option("--pdf-path", help="path to the source PDF")
 def create_project(title, pdf_path):
     """Create a proofing project from a PDF."""
-    current_app = ambuda.create_app("development")
+    current_app = ambuda.create_app()
     with current_app.app_context():
         session = q.get_session()
         arbitrary_user = session.query(db.User).first()

@@ -658,13 +658,14 @@ def confirm_changes(slug):
 @bp.route("/<slug>/batch-ocr", methods=["GET", "POST"])
 @p2_required
 def batch_ocr(slug):
+    import unstd.config
     project_ = q.project(slug)
     if project_ is None:
         abort(404)
 
     if request.method == "POST":
         task = ocr_tasks.run_ocr_for_project(
-            app_env=current_app.config["AMBUDA_ENVIRONMENT"],
+            app_env=unstd.config.current.AMBUDA_ENVIRONMENT,
             project=project_,
         )
         if task:

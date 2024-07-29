@@ -2,11 +2,10 @@ import os
 from logging.config import fileConfig
 
 from alembic import context
-from dotenv import load_dotenv
 from sqlalchemy import engine_from_config, pool
 
 from ambuda.models.base import Base
-
+from unstd.config import current as cfg
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -21,8 +20,7 @@ target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
-load_dotenv(".env")
-config.set_main_option("sqlalchemy.url", os.environ["SQLALCHEMY_DATABASE_URI"])
+config.set_main_option("sqlalchemy.url", cfg.SQLALCHEMY_DATABASE_URI)
 
 
 def run_migrations_offline() -> None:

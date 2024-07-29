@@ -27,7 +27,8 @@ except ImportError:
 # functools.cache makes this return value a singleton.
 @functools.cache
 def get_engine():
-    database_uri = current_app.config["SQLALCHEMY_DATABASE_URI"]
+    import unstd.config
+    database_uri = unstd.config.current.SQLALCHEMY_DATABASE_URI
     return create_engine(database_uri)
 
 

@@ -1,7 +1,7 @@
 import shutil
 import subprocess
 from pathlib import Path
-import util
+import unstd.os
 REPO = "https://github.com/ambuda-org/ambuda-i18n.git"
 
 def __fetch_git_repo(url: str, path: Path):
@@ -30,9 +30,9 @@ def generate(args):
     src_dir = git_dir / "translations"
     __compile_translations(src_dir)
 
-    dest_dir = "/app/ambuda/translations"
+    dest_dir = Path("/app/ambuda/translations")
 
-    util.make_dir(dest_dir)
+    unstd.os.make_dir(dest_dir)
     __copy_translation_files(src_dir, dest_dir)
 
     print("Done.")

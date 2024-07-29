@@ -1,13 +1,13 @@
 import hashlib
 import io
-import os
 import zipfile
 
+import unstd.config
 import requests
 from sqlalchemy import create_engine
 
 from ambuda import database as db
-import ambuda.system
+from unstd.config import CACHE_DIR
 
 def fetch_text(url: str, read_from_cache: bool = True) -> str:
     """Fetch text data against a simple cache.
@@ -20,10 +20,10 @@ def fetch_text(url: str, read_from_cache: bool = True) -> str:
     :param read_from_cache: if true, check the cache before fetching over the
         network.
     """
-    ambuda.system.CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
     code = hashlib.sha256(url.encode()).hexdigest()
-    path = ambuda.system.CACHE_DIR / code
+    path = CACHE_DIR / code
 
     if path.exists() and read_from_cache:
         return path.read_text()
@@ -49,10 +49,10 @@ def fetch_bytes(url: str, read_from_cache: bool = True) -> bytes:
     :param read_from_cache: if true, check the cache before fetching over the
         network.
     """
-    ambuda.system.CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
     code = hashlib.sha256(url.encode()).hexdigest()
-    path = ambuda.system.CACHE_DIR / code
+    path = CACHE_DIR / code
 
     if path.exists() and read_from_cache:
         return path.read_bytes()
@@ -75,7 +75,7 @@ def unzip_and_read(zip_bytes: bytes, filepath: str) -> str:
 
 def create_db():
     """Create a SQLAlchemy database engine."""
-    engine = create_engine(ambuda.system.sql_uri())
+    engine = create_engine(unstd.config.current.SQLALCHEMY_DATABASE_URI)
 
     db.Base.metadata.create_all(engine)
     return engine

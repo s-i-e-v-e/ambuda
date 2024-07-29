@@ -9,13 +9,12 @@ import logging
 import sys
 
 import sentry_sdk
-from dotenv import load_dotenv
 from flask import Flask, session
 from flask_babel import Babel, pgettext
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sqlalchemy import exc
 
-from ambuda import config
+from unstd import config
 from ambuda import admin as admin_manager
 from ambuda import auth as auth_manager
 from ambuda import checks, filters, queries
@@ -78,20 +77,17 @@ def _initialize_logger(log_level: int) -> None:
     logging.getLogger().addHandler(handler)
 
 
-def create_app(config_env: str):
+def create_app():
     """Initialize the Ambuda application."""
 
-    # We store all env variables in a `.env` file so that it's easier to manage
-    # different configurations.
-    load_dotenv(".env")
-    config_spec = config.load_config_object(config_env)
+    config_spec = config.current
 
     # Initialize Sentry monitoring only in production so that our Sentry page
     # contains only production warnings (as opposed to dev warnings).
     #
     # "Configuration should happen as early as possible in your application's
     # lifecycle." -- Sentry docs
-    if config_env == config.PRODUCTION:
+    if config.is_production_config(config_spec):
         _initialize_sentry(config_spec.SENTRY_DSN)
 
     app = Flask(__name__)
@@ -100,8 +96,7 @@ def create_app(config_env: str):
     app.config.from_object(config_spec)
 
     # Sanity checks
-    assert config_env == config_spec.AMBUDA_ENVIRONMENT
-    if config_env != config.TESTING:
+    if not config.is_testing_config(config_spec):
         with app.app_context():
             checks.check_database_uri(config_spec.SQLALCHEMY_DATABASE_URI)
 
@@ -109,7 +104,7 @@ def create_app(config_env: str):
     _initialize_logger(config_spec.LOG_LEVEL)
 
     # Database
-    _initialize_db_session(app, config_env)
+    _initialize_db_session(app, config_spec.AMBUDA_ENVIRONMENT)
 
     # A custom Babel locale_selector.
     def get_locale():
@@ -141,7 +136,7 @@ def create_app(config_env: str):
     app.register_blueprint(texts, url_prefix="/texts")
 
     # Debug-only routes for local development.
-    if app.debug or config.TESTING:
+    if app.debug or config.is_testing_config(config_spec):
         from ambuda.views.debug import bp as debug_bp
 
         app.register_blueprint(debug_bp, url_prefix="/debug")

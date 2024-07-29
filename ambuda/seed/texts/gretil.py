@@ -21,7 +21,7 @@ class Spec:
 
 REPO = "https://github.com/ambuda-org/gretil.git"
 
-from ambuda.system import GRETIL_DATA_DIR as DATA_DIR
+from unstd.config import GRETIL_DATA_DIR as DATA_DIR
 
 #: Slug to use for texts that have only one section.
 

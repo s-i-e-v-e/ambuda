@@ -2,12 +2,13 @@
 # NOTE: run this script in the production environment.
 #
 
-from ambuda.config import create_config_only_app
-import util
+from typing import List
+from ambuda.flask_config import create_config_only_app
+import unstd.os
 
 
-def verify(args):
-    ev = util.next_arg_pair(args)
+def verify(args: List[str]):
+    ev = unstd.os.next_arg_pair(args)
     if ev[0] == '--env':
         if ev[1] in ['production', 'staging', 'development']:
             # Fails if config is malformed.

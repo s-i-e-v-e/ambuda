@@ -13,7 +13,7 @@ from ambuda import database as db
 from ambuda import queries as q
 from ambuda.tasks import app
 from ambuda.tasks.utils import CeleryTaskStatus, TaskStatus
-from ambuda.config import create_config_only_app
+from ambuda.flask_config import create_config_only_app
 
 
 def _split_pdf_into_pages(

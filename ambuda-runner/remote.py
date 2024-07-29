@@ -1,6 +1,6 @@
 import subprocess
 import os
-import util
+import unstd.os
 
 def write_text(file_name, data):
     with open(file_name, "w") as text_file:
@@ -19,7 +19,7 @@ def remote_exec(cmd):
     write_text(KEY_FILE, SSH_KEY)
     write_text(HOST_FILE, SSH_KNOWN_HOSTS)
 
-    dir = util.random_string()
+    dir = unstd.os.random_string()
     remote_cmd = f"""
     mkdir -p /tmp/{dir} \
     && cd /tmp/{dir} \

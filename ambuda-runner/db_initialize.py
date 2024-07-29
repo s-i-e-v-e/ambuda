@@ -7,10 +7,7 @@ from pathlib import Path
 
 from sqlalchemy import create_engine
 
-import sys
-sys.path.append('/app')
-sys.path.append('/app/ambuda')
-import ambuda.system
+import unstd.config
 from ambuda import database as db
 from ambuda.seed import lookup
 import seeding
@@ -78,13 +75,13 @@ def load_database(db_file_path):
         raise load_ex
 
 
-def run(seed_type):
+def run(cfg: unstd.config.BaseConfig, seed_type):
     """
     Initialize db for fresh installs. Load db on restarts.
     Return value is boolean as the caller is a shell script.
     """
 
-    sql_uri = ambuda.system.sql_uri()
+    sql_uri = cfg.SQLALCHEMY_DATABASE_URI
     try:
         db_file_path = get_db_file_path(sql_uri)
     except Exception as err:
