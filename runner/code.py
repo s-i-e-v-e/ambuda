@@ -25,7 +25,9 @@ def __js_check():
 
 
 def __js_lint():
-    unstd.os.run(["npx", "eslint", "--fix", "/app/ambuda/static/js/*", "--ext" ".js,.ts"])
+    unstd.os.run(
+        ["npx", "eslint", "--fix", "/app/ambuda/static/js/*", "--ext" ".js,.ts"]
+    )
 
 
 def __py_lint_check():
@@ -38,7 +40,7 @@ def __py_lint():
     unstd.os.run(["black", "."])
 
 
-def check(args: List[str]):
+def check(args: List[str]) -> None:
     print("Checking TYPES")
     __js_check()
 
@@ -49,9 +51,9 @@ def __test_with_coverage():
     __py_test_coverage()
 
 
-def test(args: List[str]):
+def test(args: List[str]) -> None:
     cv = unstd.os.xs_next(args, None)
-    if cv == '--coverage':
+    if cv == "--coverage":
         __test_with_coverage()
     else:
         print("Testing JS + PY")
@@ -59,7 +61,7 @@ def test(args: List[str]):
         __py_test()
 
 
-def lint(args: List[str]):
+def lint(args: List[str]) -> None:
     print("Linting JS + PY")
     __js_lint()
     __py_lint()

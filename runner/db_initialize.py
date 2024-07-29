@@ -12,6 +12,7 @@ from ambuda import database as db
 from ambuda.seed import lookup
 import seeding
 
+
 def get_db_file_path(sql_uri):
     """get file path from sql alchemy uri"""
 
@@ -39,7 +40,7 @@ def init_database(sql_uri, db_file_path, seed_type):
     db.Base.metadata.create_all(engine)
 
     try:
-        if seed_type == 'all':
+        if seed_type == "all":
             seeding.all()
         else:
             seeding.basic()
@@ -93,7 +94,9 @@ def run(cfg: unstd.config.BaseConfig, seed_type):
         try:
             load_database(db_file_path)
         except Exception as load_ex:
-            print(f"Error! Failed to load database from {db_file_path}. Error: {load_ex}")
+            print(
+                f"Error! Failed to load database from {db_file_path}. Error: {load_ex}"
+            )
             return False
     else:
         # This is a new deployment.
@@ -101,7 +104,9 @@ def run(cfg: unstd.config.BaseConfig, seed_type):
         try:
             init_database(sql_uri, db_file_path, seed_type)
         except Exception as init_ex:
-            print(f"Error! Failed to initialize database at {db_file_path}. Error: {init_ex}")
+            print(
+                f"Error! Failed to initialize database at {db_file_path}. Error: {init_ex}"
+            )
             return False
     print("Database set up complete.")
     return True

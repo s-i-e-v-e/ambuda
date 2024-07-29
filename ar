@@ -3,11 +3,11 @@ if [ "$1" == "container" ]; then
   source /venv/bin/activate
   pip install PyYAML
   shift
-  python `pwd`/ambuda-runner/yrunc.py $*
+  python `pwd`/runner/yrunc.py $*
 else
   python3 -m venv /tmp/venv
   source /tmp/venv/bin/activate
   python3 -m pip install --upgrade pip
   pip install PyYAML requests
-  python3 `pwd`/ambuda-runner/yrunv.py $*
+  python3 `pwd`/runner/yrunv.py $*
 fi

@@ -6,6 +6,7 @@ from typing import List
 
 def random_string() -> str:
     import uuid
+
     return uuid.uuid4().__str__()
 
 
@@ -17,12 +18,12 @@ def copy_file(s, d):
 
 
 def read_file_as_string(p) -> str:
-    with open(p, 'r') as f:
+    with open(p, "r") as f:
         return f.read()
 
 
 def write_file_as_string(p, data):
-    with open(p, 'w') as f:
+    with open(p, "w") as f:
         f.write(data)
 
 
@@ -69,11 +70,15 @@ def next_arg_pair(xs: List[str]):
 
 
 def get_git_sha() -> str:
-    p = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], capture_output=True, text=True)
+    p = subprocess.run(
+        ["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True
+    )
     return p.stdout.strip()
 
 
 def get_external_ip() -> str:
     # return requests.get('https://checkip.amazonaws.com').text.strip()
-    x = subprocess.run(['ip', 'route', 'get', '1'], capture_output=True).stdout.decode('utf-8')
-    return x.split(' ')[6]
+    x = subprocess.run(["ip", "route", "get", "1"], capture_output=True).stdout.decode(
+        "utf-8"
+    )
+    return x.split(" ")[6]

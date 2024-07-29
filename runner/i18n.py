@@ -2,7 +2,9 @@ import shutil
 import subprocess
 from pathlib import Path
 import unstd.os
+
 REPO = "https://github.com/ambuda-org/ambuda-i18n.git"
+
 
 def __fetch_git_repo(url: str, path: Path):
     """Fetch the latest version of the given repo."""
@@ -16,7 +18,9 @@ def __fetch_git_repo(url: str, path: Path):
 
 
 def __compile_translations(path: Path):
-    subprocess.call(f"pybabel compile -d {path} -f", shell=True, stderr=subprocess.DEVNULL)
+    subprocess.call(
+        f"pybabel compile -d {path} -f", shell=True, stderr=subprocess.DEVNULL
+    )
 
 
 def __copy_translation_files(src_dir: Path, dest_dir: Path):

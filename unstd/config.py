@@ -39,10 +39,10 @@ def __read_env_file(name) -> Dict[str, str]:
     if not unstd.os.file_exists(name):
         return m
 
-    with open(name, 'r') as f:
+    with open(name, "r") as f:
         xs = [x.strip() for x in f.readlines()]
-        xs = filter(lambda x: x and not x.startswith('#'), xs)
-        xs = [x.split('=') for x in xs]
+        xs = filter(lambda x: x and not x.startswith("#"), xs)
+        xs = [x.split("=") for x in xs]
         for x in xs:
             m[x[0]] = x[1]
     return m
@@ -51,11 +51,11 @@ def __read_env_file(name) -> Dict[str, str]:
 def __read_env(file, default_file) -> Dict[str, str]:
     # load default
     m = __read_env_file(default_file)
-    print(f'DEFAULT: {m}')
+    print(f"DEFAULT: {m}")
 
     # override with one from file
     n = __read_env_file(file)
-    print(f'ENV: {n}')
+    print(f"ENV: {n}")
     for k, v in m.items():
         m[k] = n[k] if k in n else m[k]
 
@@ -138,7 +138,7 @@ class BaseConfig:
 
     #: If True, enable cross-site request forgery (CSRF) protection.
     #: This must be True in production.
-    WTF_CSRF_ENABLED: bool # Default: True
+    WTF_CSRF_ENABLED: bool  # Default: True
 
     # Services
     # --------
@@ -176,10 +176,15 @@ class BaseConfig:
     # so we don't need to define it on the Config object here.
     GOOGLE_APPLICATION_CREDENTIALS: str
 
+    is_production: bool
+    is_testing: bool
+
     def __init__(self, dt: Optional[Dict[str, str]]) -> None:
         if dt:
-            self.AMBUDA_ENVIRONMENT = dt['AMBUDA_ENVIRONMENT']
-            self.FLASK_ENV = PRODUCTION if self.AMBUDA_ENVIRONMENT == PRODUCTION else DEVELOPMENT
+            self.AMBUDA_ENVIRONMENT = dt["AMBUDA_ENVIRONMENT"]
+            self.FLASK_ENV = (
+                PRODUCTION if self.AMBUDA_ENVIRONMENT == PRODUCTION else DEVELOPMENT
+            )
             self.SECRET_KEY = dt["SECRET_KEY"]
             self.SQLALCHEMY_DATABASE_URI = dt["SQLALCHEMY_DATABASE_URI"]
             self.AMBUDA_CONTAINER_IP = dt["AMBUDA_CONTAINER_IP"]
@@ -205,6 +210,8 @@ class BaseConfig:
             self.TESTING = dt["TESTING"] == "True"
             self.AMBUDA_BOT_PASSWORD = dt["AMBUDA_BOT_PASSWORD"]
             self.GOOGLE_APPLICATION_CREDENTIALS = dt["GOOGLE_APPLICATION_CREDENTIALS"]
+            self.is_production = self.AMBUDA_ENVIRONMENT == PRODUCTION
+            self.is_testing = self.AMBUDA_ENVIRONMENT == TESTING
 
 
 def _validate_config(config: BaseConfig):
@@ -230,11 +237,15 @@ def _validate_config(config: BaseConfig):
         raise ValueError("FLASK_UPLOAD_FOLDER must be an absolute path.")
 
     if not config.VIDYUT_DATA_DIR:
-        print("Error! VIDYUT_DATA_DIR is not set. Please set environment variable VIDYUT_DATA_DIR")
+        print(
+            "Error! VIDYUT_DATA_DIR is not set. Please set environment variable VIDYUT_DATA_DIR"
+        )
         return False
 
     if not config.VIDYUT_DATA_URL:
-        print("Error! URL to fetch Vidyut data is not set. Please set environment variable VIDYUT_DATA_URL")
+        print(
+            "Error! URL to fetch Vidyut data is not set. Please set environment variable VIDYUT_DATA_URL"
+        )
         return False
 
     # Production-specific validation.
@@ -256,23 +267,17 @@ def _validate_config(config: BaseConfig):
         assert Path(google_creds).exists()
 
 
-def is_production_config(c: BaseConfig) -> bool:
-    return c.AMBUDA_ENVIRONMENT == PRODUCTION
-
-
-def is_testing_config(c: BaseConfig) -> bool:
-    return c.AMBUDA_ENVIRONMENT == TESTING
-
-
 def load_config_object(name: str):
     """Load and validate an application config."""
-    read = lambda x: BaseConfig(__read_env('/data/container.env', f'/app/deploy/{x}.container.env'))
+    read = lambda x: BaseConfig(
+        __read_env("/data/container.env", f"/app/deploy/{x}.container.env")
+    )
     config_map = {
-        TESTING: read('testing'),
-        DEVELOPMENT: read('development.container.env'),
-        BUILD: read('build.container.env'),
-        STAGING: read('staging.container.env'),
-        PRODUCTION: read('production.container.env'),
+        TESTING: read("testing"),
+        DEVELOPMENT: read("development.container.env"),
+        BUILD: read("build.container.env"),
+        STAGING: read("staging.container.env"),
+        PRODUCTION: read("production.container.env"),
     }
     config = config_map[name]
     _validate_config(config)
@@ -283,16 +288,18 @@ def read_host_config() -> HostConfig:
     return HostConfig(
         unstd.os.get_git_sha(),
         unstd.os.get_external_ip(),
-        __read_env('/data/ambuda/host.env', 'deploy/envars/default.host.env')
+        __read_env("/data/ambuda/host.env", "deploy/envars/default.host.env"),
     )
 
 
 def read_container_config() -> BaseConfig:
-    return BaseConfig(__read_env('/data/container.env', '/app/deploy/envars/default.container.env'))
+    return BaseConfig(
+        __read_env("/data/container.env", "/app/deploy/envars/default.container.env")
+    )
 
 
-print(f'os_file: {__file__}')
-if __file__ == '/app/unstd/config.py':
+print(f"os_file: {__file__}")
+if __file__ == "/app/unstd/config.py":
     current = read_container_config()
 else:
     current = BaseConfig(None)

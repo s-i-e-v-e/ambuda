@@ -1,8 +1,9 @@
 import unstd.os
+import unstd.config
 
 
 def __init(cfg: unstd.config.BaseConfig):
-    vidyut_marker=f"{cfg.VIDYUT_DATA_DIR}/vidyut_is_here"
+    vidyut_marker = f"{cfg.VIDYUT_DATA_DIR}/vidyut_is_here"
     if unstd.os.file_exists(vidyut_marker):
         # TODO: calculate SHA256 of installed files and compare
         print("Vidyut data found!")
@@ -14,7 +15,7 @@ def __init(cfg: unstd.config.BaseConfig):
     vidyut_data_file = unstd.os.extract_file_name(cfg.VIDYUT_DATA_URL)
     fp = f"{cfg.VIDYUT_DATA_DIR}/{vidyut_data_file}"
 
-    if unstd.os.run(["wget", "-P" ,cfg.VIDYUT_DATA_DIR, cfg.VIDYUT_DATA_URL, "-q"]):
+    if unstd.os.run(["wget", "-P", cfg.VIDYUT_DATA_DIR, cfg.VIDYUT_DATA_URL, "-q"]):
         if unstd.os.run(["unzip", "-d", cfg.VIDYUT_DATA_DIR, "-j", fp]):
             pass
         else:
@@ -25,7 +26,7 @@ def __init(cfg: unstd.config.BaseConfig):
         return False
 
     # Successfully installed. Leave a mark.
-    unstd.os.run(["touch",  vidyut_marker])
+    unstd.os.run(["touch", vidyut_marker])
     return True
 
 

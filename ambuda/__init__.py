@@ -41,7 +41,7 @@ def _initialize_sentry(sentry_dsn: str):
     )
 
 
-def _initialize_db_session(app, config_name: str):
+def _initialize_db_session(app, config_spec: config.BaseConfig):
     """Ensure that our SQLAlchemy session behaves well.
 
     The Flask-SQLAlchemy library manages all of this boilerplate for us
@@ -56,7 +56,7 @@ def _initialize_db_session(app, config_name: str):
         """Reset session state to prevent caching and memory leaks."""
         queries.get_session_class().remove()
 
-    if config_name == config.PRODUCTION:
+    if config_spec.is_production:
         # The hook below hides database errors. So, install the hook only if
         # we're in production.
 
@@ -87,7 +87,7 @@ def create_app():
     #
     # "Configuration should happen as early as possible in your application's
     # lifecycle." -- Sentry docs
-    if config.is_production_config(config_spec):
+    if config_spec.is_production:
         _initialize_sentry(config_spec.SENTRY_DSN)
 
     app = Flask(__name__)
@@ -96,7 +96,7 @@ def create_app():
     app.config.from_object(config_spec)
 
     # Sanity checks
-    if not config.is_testing_config(config_spec):
+    if not config_spec.is_testing:
         with app.app_context():
             checks.check_database_uri(config_spec.SQLALCHEMY_DATABASE_URI)
 
@@ -104,7 +104,7 @@ def create_app():
     _initialize_logger(config_spec.LOG_LEVEL)
 
     # Database
-    _initialize_db_session(app, config_spec.AMBUDA_ENVIRONMENT)
+    _initialize_db_session(app, config_spec)
 
     # A custom Babel locale_selector.
     def get_locale():
@@ -136,7 +136,7 @@ def create_app():
     app.register_blueprint(texts, url_prefix="/texts")
 
     # Debug-only routes for local development.
-    if app.debug or config.is_testing_config(config_spec):
+    if app.debug or config_spec.is_testing:
         from ambuda.views.debug import bp as debug_bp
 
         app.register_blueprint(debug_bp, url_prefix="/debug")
