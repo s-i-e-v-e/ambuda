@@ -2,7 +2,7 @@ import unstd.os
 import unstd.config
 
 
-def __init(cfg: unstd.config.BaseConfig):
+def __init(cfg: unstd.config.ContainerConfig):
     vidyut_marker = f"{cfg.VIDYUT_DATA_DIR}/vidyut_is_here"
     if unstd.os.file_exists(vidyut_marker):
         # TODO: calculate SHA256 of installed files and compare

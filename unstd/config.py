@@ -1,33 +1,21 @@
-"""Config management for the Ambuda Flask app.
-
-All of Ambuda's interesting config values are defined in the project's `.env`
-file. Here, we parse that file and map its values to specific config objects,
-which we then load into Flask.
-
-Most config values are documented on :class:`BaseConfig`, from which all other
-classes inherit. Production-specific config values, which are mainly replated
-to deployment, are defined on :class:`ProductionConfig`.
-
-It's considered a best practice to keep this module outside the application
-package: From the Flask docs (emphasis added):
-
-    Configuration becomes more useful if you can store it in a separate file,
-    *ideally located outside the actual application package*.
-"""
-
 import logging
 
-from pathlib import Path
 from typing import Dict, Any, Optional
 import unstd.os
-import os
 
+from pathlib import Path
+
+TMP_DIR = Path("/tmp") / "ambuda-seeding"
+GRETIL_DATA_DIR = TMP_DIR / "ambuda-gretil"
+DCS_DATA_DIR = TMP_DIR / "ambuda-dcs"
+DCS_RAW_FILE_DIR = TMP_DIR / "dcs-raw" / "files"
+CACHE_DIR = TMP_DIR / "download-cache"
+
+DEFAULT = "default"
 #: The test environment. For unit tests only.
 TESTING = "testing"
 #: The development environment. For local development.
 DEVELOPMENT = "development"
-#: The build environment. For build on github.
-BUILD = "build"
 #: The staging environment. For testing on staging.
 STAGING = "staging"
 #: The production environment. For production serving.
@@ -36,9 +24,11 @@ PRODUCTION = "production"
 
 def __read_env_file(name) -> Dict[str, str]:
     m = dict()
+    #print(f"Reading {name}")
     if not unstd.os.file_exists(name):
         return m
 
+    #print(f"SUCCESS {name}")
     with open(name, "r") as f:
         xs = [x.strip() for x in f.readlines()]
         xs = filter(lambda x: x and not x.startswith("#"), xs)
@@ -51,14 +41,13 @@ def __read_env_file(name) -> Dict[str, str]:
 def __read_env(file, default_file) -> Dict[str, str]:
     # load default
     m = __read_env_file(default_file)
-    print(f"DEFAULT: {m}")
 
     # override with one from file
     n = __read_env_file(file)
-    print(f"ENV: {n}")
-    for k, v in m.items():
-        m[k] = n[k] if k in n else m[k]
-
+    for k in m.keys():
+        v = n[k] if k in n.keys() else m[k]
+        #print(f"{k} = {v} {f'({m[k]})' if k in n.keys() else ''}")
+        m[k] = v
     return m
 
 
@@ -78,7 +67,7 @@ class HostConfig:
         self.AMBUDA_HOST_IP = external_ip
 
 
-class BaseConfig:
+class ContainerConfig:
     # Core settings
     # -------------
 
@@ -214,7 +203,7 @@ class BaseConfig:
             self.is_testing = self.AMBUDA_ENVIRONMENT == TESTING
 
 
-def _validate_config(config: BaseConfig):
+def __validate_config(config: ContainerConfig):
     """Examine the given config and fail if the config is malformed.
 
     :param config: the config to test
@@ -222,7 +211,6 @@ def _validate_config(config: BaseConfig):
     assert config.AMBUDA_ENVIRONMENT in {
         TESTING,
         DEVELOPMENT,
-        BUILD,
         STAGING,
         PRODUCTION,
     }
@@ -267,20 +255,18 @@ def _validate_config(config: BaseConfig):
         assert Path(google_creds).exists()
 
 
+def __get_container_config_for(x: str) -> ContainerConfig:
+    if x not in [DEFAULT, TESTING, DEVELOPMENT, STAGING, PRODUCTION]:
+        raise ValueError(f"Unknown container config type: {x}")
+    return ContainerConfig(__read_env("/data/container.env", f"/app/deploy/envars/{x}.container.env"))
+
+
 def load_config_object(name: str):
     """Load and validate an application config."""
-    read = lambda x: BaseConfig(
-        __read_env("/data/container.env", f"/app/deploy/{x}.container.env")
-    )
-    config_map = {
-        TESTING: read("testing"),
-        DEVELOPMENT: read("development.container.env"),
-        BUILD: read("build.container.env"),
-        STAGING: read("staging.container.env"),
-        PRODUCTION: read("production.container.env"),
-    }
-    config = config_map[name]
-    _validate_config(config)
+
+    # config_map = {x: __get_container_config_for(x) for x in [TESTING, DEVELOPMENT, STAGING, PRODUCTION]}
+    config = __get_container_config_for(name)
+    __validate_config(config)
     return config
 
 
@@ -288,26 +274,20 @@ def read_host_config() -> HostConfig:
     return HostConfig(
         unstd.os.get_git_sha(),
         unstd.os.get_external_ip(),
-        __read_env("/data/ambuda/host.env", "deploy/envars/default.host.env"),
+        __read_env("/data/ambuda/host.env", f"deploy/envars/host.env")
     )
 
 
-def read_container_config() -> BaseConfig:
-    return BaseConfig(
-        __read_env("/data/container.env", "/app/deploy/envars/default.container.env")
-    )
+def read_container_config() -> ContainerConfig:
+    # Will always load conservative envars by default
+    # Can be overridden by changing values in /data/container.env
+    config = __get_container_config_for(DEFAULT)
+
+    __validate_config(config)
+    return config
 
 
-print(f"os_file: {__file__}")
 if __file__ == "/app/unstd/config.py":
     current = read_container_config()
 else:
-    current = BaseConfig(None)
-
-from pathlib import Path
-
-TMP_DIR = Path("/tmp") / "ambuda-seeding"
-GRETIL_DATA_DIR = TMP_DIR / "ambuda-gretil"
-DCS_DATA_DIR = TMP_DIR / "ambuda-dcs"
-DCS_RAW_FILE_DIR = TMP_DIR / "dcs-raw" / "files"
-CACHE_DIR = TMP_DIR / "download-cache"
+    current = ContainerConfig(None)

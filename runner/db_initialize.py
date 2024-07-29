@@ -76,7 +76,7 @@ def load_database(db_file_path):
         raise load_ex
 
 
-def run(cfg: unstd.config.BaseConfig, seed_type):
+def run(cfg: unstd.config.ContainerConfig, seed_type):
     """
     Initialize db for fresh installs. Load db on restarts.
     Return value is boolean as the caller is a shell script.

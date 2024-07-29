@@ -41,7 +41,7 @@ def _initialize_sentry(sentry_dsn: str):
     )
 
 
-def _initialize_db_session(app, config_spec: config.BaseConfig):
+def _initialize_db_session(app, config_spec: config.ContainerConfig):
     """Ensure that our SQLAlchemy session behaves well.
 
     The Flask-SQLAlchemy library manages all of this boilerplate for us
