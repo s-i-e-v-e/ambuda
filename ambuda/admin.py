@@ -1,10 +1,8 @@
 """Manages an internal admin view for site data."""
-
 from flask import abort
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib import sqla
 from flask_login import current_user
-
 import ambuda.database as db
 import ambuda.queries as q
 

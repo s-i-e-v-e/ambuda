@@ -44,6 +44,6 @@ COPY ./ /app
 WORKDIR /app
 RUN ./ar i18n
 RUN echo "************* [1:3] RUNNING NPX *****************"
-RUN npx tailwindcss -i /app/ambuda/static/css/style.css -o /app/ambuda/static/gen/style.css --minify
-RUN npx esbuild /app/ambuda/static/js/main.js --outfile=/app/ambuda/static/gen/main.js --bundle --minify
+RUN npx tailwindcss -i /app/static/css/style.css -o /app/static/gen/style.css --minify
+RUN npx esbuild /app/static/js/main.js --outfile=/app/static/gen/main.js --bundle --minify
 RUN echo "************* PODMAN IMAGE BUILT *****************"

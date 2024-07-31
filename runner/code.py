@@ -21,12 +21,12 @@ def __py_test_coverage():
 
 
 def __js_check():
-    unstd.os.run(["npx", "tsc", "/app/ambuda/static/js/*.ts" "-noEmit"])
+    unstd.os.run(["npx", "tsc", "/app/static/js/*.ts" "-noEmit"])
 
 
 def __js_lint():
     unstd.os.run(
-        ["npx", "eslint", "--fix", "/app/ambuda/static/js/*", "--ext" ".js,.ts"]
+        ["npx", "eslint", "--fix", "/app/static/js/*", "--ext" ".js,.ts"]
     )
 
 

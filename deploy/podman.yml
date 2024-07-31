@@ -24,7 +24,7 @@ spec:
       volumeMounts:
         - mountPath: /data
           name: data
-#        - mountPath: /app/ambuda/static
+#        - mountPath: /app/static
 #          name: static
   volumes:
     - name: data
@@ -33,6 +33,6 @@ spec:
         type: Directory
 #    - name: static
 #      hostPath:
-#        path: ${PWD}/ambuda/static
+#        path: ${PWD}/static
 #        type: Directory
 status: { }

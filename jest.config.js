@@ -5,7 +5,7 @@
 
 module.exports = {
   collectCoverageFrom: [
-    "ambuda/static/js/*.{js,ts}",
+    "static/js/*.{js,ts}",
   ],
   // Indicates whether the coverage information should be collected while executing the test
   coverageDirectory: "js-coverage-report",
@@ -19,7 +19,7 @@ module.exports = {
   },
   // Use '@' to refer to the root folder that contains all source modules.
   moduleNameMapper: {
-    "^@/(.*)": "<rootDir>/ambuda/static/js/$1",
+    "^@/(.*)": "<rootDir>/static/js/$1",
   },
   roots: [
     "<rootDir>/test/js/",

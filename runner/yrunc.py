@@ -32,13 +32,13 @@ def __start():
 
     if cfg.FLASK_ENV == "development":
         # Start flask server in development mode
-        # Dynamically load css and js changes. Docker compose attaches to the ambuda/static directory on localhost.
+        # Dynamically load css and js changes. Docker compose attaches to the ./static directory on localhost.
         unstd.os.run(
             [
                 "./node_modules/.bin/concurrently",
                 f"/venv/bin/flask run -h {cfg.AMBUDA_CONTAINER_IP} -p 5000",
-                "npx tailwindcss -i /app/ambuda/static/css/style.css -o /app/ambuda/static/gen/style.css --watch",
-                "npx esbuild /app/ambuda/static/js/main.js --outfile=/app/ambuda/static/gen/main.js --bundle --watch",
+                "npx tailwindcss -i /app/static/css/style.css -o /app/static/gen/style.css --watch",
+                "npx esbuild /app/static/js/main.js --outfile=/app/static/gen/main.js --bundle --watch",
             ]
         )
     else:
