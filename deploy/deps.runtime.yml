@@ -1,0 +1,94 @@
+packages:
+  - alembic:
+    - py: $
+    - alpine: py3-$
+    - arch: python-$
+  - celery: []
+  - click:
+    - py: $
+    - alpine: py3-$
+    - arch: python-$
+  - conllu:
+    - py: $
+    - alpine: ''
+    - arch: ''
+  - dateutil:
+    - py: python-$
+    - alpine: py3-$
+    - arch: python-$
+  - fitz:
+    - py: pymupdf
+    - alpine: ''
+    - arch: python-pymupdf
+  - flask:
+    - py: $
+    - alpine: py3-$
+    - arch: python-$
+  - flask_admin:
+    - py: $
+    - alpine: ''
+    - arch: ''
+  - flask_babel:
+    - py: $
+    - alpine: py3-$
+    - arch: python-$
+  - flask_login:
+    - py: $
+    - alpine: py3-$
+    - arch: python-$
+  - flask_mail:
+    - py: $
+    - alpine: ''
+    - arch: python-$
+  - flask_wtf:
+    - py: $
+    - alpine: py3-$
+    - arch: python-$
+  - google.cloud.vision:
+    - py: $
+    - alpine: ''
+    - arch: ''
+  - greenlet:
+    - py: $
+    - alpine: py3-$
+    - arch: python-$
+  - indic_transliteration:
+    - py: $
+    - alpine: ''
+    - arch: ''
+  - markdown_it:
+    - py: $-py
+    - alpine: py3-$-py
+    - arch: python-$-py
+  - markupsafe:
+    - py: $
+    - alpine: py3-$
+    - arch: python-$
+  - requests:
+    - py: $
+    - alpine: py3-$
+    - arch: python-$
+  - sentry_sdk:
+    - py: $
+    - alpine: py3-sentry-sdk
+    - arch: python-@
+  - slugify:
+    - py: $
+    - alpine: py3-$
+    - arch: python-$
+  - sqlalchemy:
+    - py: $
+    - alpine: py3-$
+    - arch: python-$
+  - werkzeug:
+    - py: $
+    - alpine: py3-$
+    - arch: python-$
+  - wtforms:
+    - py: $
+    - alpine: py3-$
+    - arch: python-$
+  - wtforms_sqlalchemy:
+    - py: $
+    - alpine: ''
+    - arch: ''

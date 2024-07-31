@@ -1,16 +1,15 @@
 #
 # Podman images and containers/pods
 #
-from typing import List
-
+from typing import List, Optional
 import unstd.os
 import unstd.config
 
 cfg = unstd.config.read_host_config()
 
-
 def build(args: List[str]):
-    print("podman: BUILD")
+    os_name = args[0] if len(args) else "alpine"
+    print(F"podman: BUILDING {os_name}")
 
     unstd.os.run(
         [
@@ -21,7 +20,7 @@ def build(args: List[str]):
             "--tag",
             cfg.AMBUDA_IMAGE_LATEST,
             "-f",
-            "deploy/Containerfile",
+            f"deploy/Containerfile.{os_name}",
             ".",
         ]
     )
@@ -30,7 +29,7 @@ def build(args: List[str]):
 def stage(args: List[str]):
     print("podman: STAGE")
 
-    pod_file = f"/tmp/{unstd.os.random_string()}/podman.yml"
+    pod_file = f"/tmp/podman/{unstd.os.random_string()}.yml"
     unstd.os.copy_file("deploy/podman.yml", pod_file)
 
     xs = ["/app/ar", "container", "init"]

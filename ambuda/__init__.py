@@ -91,6 +91,7 @@ def create_app():
         _initialize_sentry(config_spec.SENTRY_DSN)
 
     app = Flask(__name__)
+    app._static_folder = config_spec.STATIC_DIR
 
     # Config
     app.config.from_object(config_spec)

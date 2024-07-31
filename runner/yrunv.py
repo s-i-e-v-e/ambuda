@@ -2,12 +2,9 @@
 # RUNS ON VPS/VM/LOCAL
 #
 import sys
-
 sys.path.extend(["./", "./ambuda", "./unstd"])
 
 import podman
-from gh import gh_generate_workflows
-import i18n
 import _yrun
 import unstd.os
 
@@ -30,8 +27,6 @@ def __main():
     #     # command has to be executed locally
     #     pass
     switch = {
-        "i18n": i18n.generate,
-        "gh": gh_generate_workflows,
         "build": podman.build,  # build image
         "stage": podman.stage,  # stage container
         "inspect": podman.inspect,

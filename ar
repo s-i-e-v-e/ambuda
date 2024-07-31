@@ -1,13 +1,19 @@
 #!/bin/bash
-if [ "$1" == "container" ]; then
-  source /venv/bin/activate
-  pip install PyYAML
+if [ "$1" == "install" ]; then
+  python `pwd`/runner/c.install.py
+elif [ "$1" == "i18n" ]; then
+  python `pwd`/runner/c.i18n.py
+elif [ "$1" == "gh" ]; then
+  python -m venv /tmp/venv
+  PATH="/tmp/venv/bin:/bin:$PATH"
+  source /tmp/venv/bin/activate
+  pip install -q PyYAML
+  python `pwd`/runner/v.gh.py
+elif [ "$1" == "container" ]; then
+  export PYTHONFAULTHANDLER=1
+  export PYTHONUNBUFFERED=1
   shift
   python `pwd`/runner/yrunc.py $*
 else
-  python3 -m venv /tmp/venv
-  source /tmp/venv/bin/activate
-  python3 -m pip install --upgrade pip
-  pip install PyYAML requests
-  python3 `pwd`/runner/yrunv.py $*
+  python `pwd`/runner/yrunv.py $*
 fi
