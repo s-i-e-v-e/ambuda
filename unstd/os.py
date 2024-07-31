@@ -11,32 +11,31 @@ def random_string() -> str:
     return uuid.uuid4().__str__()
 
 
-def copy(s, d):
+def copy(s: str, d: str):
     shutil.copytree(s, d, dirs_exist_ok=True)
 
 
-def copy_file(s, d):
-    xs = d.split(os.sep)
-    xs.pop()
-    os.makedirs(os.sep.join(xs), exist_ok=True)
+def copy_file(s: str, d: str):
+    dir_path = extract_dir_path(d)
+    os.makedirs(dir_path, exist_ok=True)
     shutil.copyfile(s, d)
 
 
-def read_file_as_string(p) -> str:
+def read_file_as_string(p: str) -> str:
     with open(p, "r") as f:
         return f.read()
 
 
-def write_file_as_string(p, data):
+def write_file_as_string(p: str, data: str):
     with open(p, "w") as f:
         f.write(data)
 
 
-def make_dir(p):
+def make_dir(p: str):
     os.makedirs(p, exist_ok=True)
 
 
-def rmdir(d):
+def rmdir(d: str):
     shutil.rmtree(d, ignore_errors=True)
 
 
@@ -44,28 +43,38 @@ def cwd() -> str:
     return os.getcwd()
 
 
-def run(xs, cwd: Any = None) -> bool:
+def run(xs: List[str], cwd: Any = None) -> bool:
     return subprocess.run(xs, cwd=cwd).returncode == 0
 
 
-def rm(f):
+def rm(f: str):
     os.remove(f)
 
 
-def file_exists(f) -> bool:
-    return os.path.isfile(f)
+def file_exists(x: str) -> bool:
+    return os.path.isfile(x)
 
 
-def extract_file_name(f) -> str:
-    xs = f.split(os.sep)
+def dir_exists(x: str) -> bool:
+    return os.path.isdir(x)
+
+
+def extract_file_name(x: str) -> str:
+    xs = x.split(os.sep)
     return xs.pop()
+
+
+def extract_dir_path(x: str) -> str:
+    xs = x.split(os.sep)
+    xs.pop()
+    return os.sep.join(xs)
 
 
 def exit(code: int) -> None:
     sys.exit(code)
 
 
-def next_arg(xs, default) -> str:
+def next_arg(xs: List[str], default: str) -> str:
     x = xs[0] if len(xs) > 0 else default
     if len(xs) > 0:
         del xs[0]
@@ -73,8 +82,8 @@ def next_arg(xs, default) -> str:
 
 
 def next_arg_pair(xs: List[str]):
-    a = next_arg(xs, None)
-    b = next_arg(xs, None) if a else None
+    a = next_arg(xs, '')
+    b = next_arg(xs, '') if a else None
     return a, b
 
 def is_next_arg_an_opt(xs: List[str]) -> bool:
@@ -104,3 +113,7 @@ def get_external_ip() -> str:
 
 def fix_venv():
     os.environ['PYTHONPATH'] = f"/venv/lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages"
+
+
+def get_tmp_dir() -> str:
+    return f"/tmp/{random_string()}"

@@ -9,7 +9,7 @@ REPO = "https://github.com/ambuda-org/ambuda-i18n.git"
 
 def __fetch_git_repo(url: str, path: str):
     """Fetch the latest version of the given repo."""
-    if not unstd.os.file_exists(path):
+    if not unstd.os.dir_exists(path):
         unstd.os.make_dir(path)
         unstd.os.run(["git", "clone", "--branch=main", url, path])
 
@@ -27,10 +27,10 @@ def __copy_translation_files(src_dir: str, dest_dir: str):
 
 
 def generate(args: List[str]):
-    git_dir = "/tmp/ambuda-i18n"
+    git_dir = f"{unstd.os.get_tmp_dir()}/ambuda-i18n"
     __fetch_git_repo(REPO, git_dir)
 
-    src_dir = git_dir + "/translations"
+    src_dir = f"{git_dir}/translations"
     __compile_translations(src_dir)
 
     dest_dir = "/app/ambuda/translations"

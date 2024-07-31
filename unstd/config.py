@@ -85,7 +85,7 @@ class ContainerConfig:
 
     AMBUDA_CONTAINER_IP: str
     #: Where to store user uploads (PDFs, images, etc.).
-    FLASK_UPLOAD_FOLDER: str
+    FLASK_UPLOAD_DIR: str
     VIDYUT_DATA_DIR: str
     VIDYUT_DATA_URL: str
 
@@ -175,7 +175,7 @@ class ContainerConfig:
             self.SECRET_KEY = dt["SECRET_KEY"]
             self.SQLALCHEMY_DATABASE_URI = dt["SQLALCHEMY_DATABASE_URI"]
             self.AMBUDA_CONTAINER_IP = dt["AMBUDA_CONTAINER_IP"]
-            self.FLASK_UPLOAD_FOLDER = dt["FLASK_UPLOAD_FOLDER"]
+            self.FLASK_UPLOAD_DIR = dt["FLASK_UPLOAD_FOLDER"]
             self.VIDYUT_DATA_DIR = dt["VIDYUT_DATA_DIR"]
             self.VIDYUT_DATA_URL = dt["VIDYUT_DATA_URL"]
             self.LOG_LEVEL = logging.getLevelNamesMapping()[dt["LOG_LEVEL"]]
@@ -218,10 +218,10 @@ def __validate_config(config: ContainerConfig):
     if not config.SQLALCHEMY_DATABASE_URI:
         raise ValueError("This config does not define SQLALCHEMY_DATABASE_URI")
 
-    if not config.FLASK_UPLOAD_FOLDER:
+    if not config.FLASK_UPLOAD_DIR:
         raise ValueError("This config does not define FLASK_UPLOAD_FOLDER.")
 
-    if not Path(config.FLASK_UPLOAD_FOLDER).is_absolute():
+    if not Path(config.FLASK_UPLOAD_DIR).is_absolute():
         raise ValueError("FLASK_UPLOAD_FOLDER must be an absolute path.")
 
     if not config.VIDYUT_DATA_DIR:
@@ -275,7 +275,7 @@ def read_host_config() -> HostConfig:
         unstd.os.get_git_branch(),
         unstd.os.get_git_sha(),
         unstd.os.get_external_ip(),
-        __read_env("/data/ambuda/host.env", f"deploy/envars/host.env")
+        __read_env("~/.local/share/ambuda/host.env", f"deploy/envars/host.env")
     )
 
 

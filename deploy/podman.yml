@@ -29,7 +29,7 @@ spec:
   volumes:
     - name: data
       hostPath:
-        path: /data/ambuda
+        path: ${HOME}/.local/share/ambuda
         type: Directory
 #    - name: static
 #      hostPath:

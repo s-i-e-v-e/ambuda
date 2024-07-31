@@ -8,33 +8,39 @@ from pathlib import Path
 from sqlalchemy import create_engine
 
 import unstd.config
+import unstd.os
 from ambuda import database as db
 from ambuda.seed import lookup
 import seeding
 
 
-def get_db_file_path(sql_uri):
+def get_db_file_path(sql_uri: str) -> str:
     """get file path from sql alchemy uri"""
 
     db_file_path = sql_uri.replace("sqlite:///", "")
     if db_file_path == sql_uri:
         print(f"Error! Invalid SQLALCHEMY_DATABASE_URI {sql_uri}")
         raise ValueError(f"Invalid SQLALCHEMY_DATABASE_URI: {sql_uri}")
-    return Path(db_file_path)
+    return db_file_path
 
 
-def run_module(module_name):
+def run_module(module):
     print(f'{"#"}' * 20)
-    print(f"Intializing {module_name}")
-    module_name.run()
-    print(f"{module_name} initialization successful!")
+    print(f"Intializing {module}")
+    module.run()
+    print(f"{module} initialization successful!")
     print(f'{"#"}' * 20)
 
 
-def init_database(sql_uri, db_file_path, seed_type):
+def init_database(sql_uri: str, db_file_path: str, seed_type: str):
+    import unstd.os
     """Initialize database"""
 
     print(f"Initializing database at {db_file_path}...")
+    dir_path = unstd.os.extract_dir_path(db_file_path)
+    # always make dir
+    unstd.os.make_dir(dir_path)
+
     # Create tables
     engine = create_engine(sql_uri)
     db.Base.metadata.create_all(engine)
@@ -61,9 +67,9 @@ def alembic_migrations():
         raise mig_ex
 
 
-def load_database(db_file_path):
+def load_database(db_file_path: str):
     """Database already initialized. Run lookup module (TODO: Legacy step. Check why?). Update to the latest migration."""
-    if not db_file_path.exists():
+    if not Path(db_file_path).exists():
         print(f"Database not found at {db_file_path}...")
         raise FileNotFoundError("Database file not found")
 
@@ -76,7 +82,7 @@ def load_database(db_file_path):
         raise load_ex
 
 
-def run(cfg: unstd.config.ContainerConfig, seed_type):
+def run(cfg: unstd.config.ContainerConfig, seed_type: str):
     """
     Initialize db for fresh installs. Load db on restarts.
     Return value is boolean as the caller is a shell script.
@@ -89,7 +95,7 @@ def run(cfg: unstd.config.ContainerConfig, seed_type):
         print(f"Failed to get db path - {err}")
         return False
 
-    if db_file_path.exists():
+    if unstd.os.file_exists(db_file_path):
         print(f"Database found at {db_file_path}..")
         try:
             load_database(db_file_path)

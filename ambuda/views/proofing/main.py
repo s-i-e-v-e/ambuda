@@ -185,7 +185,7 @@ def create_project():
 
         # Create all directories for this project ahead of time.
         # FIXME(arun): push this further into the Celery task.
-        project_dir = Path(unstd.config.current.FLASK_UPLOAD_FOLDER) / "projects" / slug
+        project_dir = Path(unstd.config.current.FLASK_UPLOAD_DIR) / "projects" / slug
         pdf_dir = project_dir / "pdf"
         page_image_dir = project_dir / "pages"
         pdf_dir.mkdir(parents=True, exist_ok=True)

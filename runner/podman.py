@@ -8,6 +8,7 @@ import unstd.config
 import c_install
 
 cfg = unstd.config.read_host_config()
+PODMAN_DIR = f"/{unstd.os.get_tmp_dir()}/podman"
 
 def __get_image_names(os_name: str, cfg: unstd.config.HostConfig) -> List[str]:
     base = f"ambuda-{cfg.GIT_BRANCH}-{os_name}"
@@ -30,7 +31,9 @@ def build(args: List[str]):
     [AMBUDA_IMAGE, AMBUDA_IMAGE_LATEST] = __get_image_names(os_name, cfg)
     print(f"podman: BUILDING {os_name}")
 
-    of = "/tmp/podman/Containerfile"
+    unstd.os.make_dir(PODMAN_DIR)
+    of = f"{PODMAN_DIR}/Containerfile"
+
     a = unstd.os.read_file_as_string(f"deploy/Containerfile.{os_name}")
     b = unstd.os.read_file_as_string("deploy/Containerfile.common")
     c = a + b
@@ -56,7 +59,7 @@ def stage(args: List[str]):
     [AMBUDA_IMAGE, AMBUDA_IMAGE_LATEST] = __get_image_names(os_name, cfg)
     print(f"podman: STAGING {os_name}")
 
-    pod_file = f"/tmp/podman/{unstd.os.random_string()}.yml"
+    pod_file = f"/{PODMAN_DIR}/podman.yml"
     unstd.os.copy_file("deploy/podman.yml", pod_file)
 
     # pass arguments to init script
@@ -73,6 +76,8 @@ def stage(args: List[str]):
     x = x.replace("${AMBUDA_HOST_IP}", cfg.AMBUDA_HOST_IP)
     x = x.replace("${PWD}", unstd.os.cwd())
     x = x.replace("${CMD}", cmd)
+    x = x.replace("${HOME}", os.environ['HOME'])
+
     unstd.os.write_file_as_string(pod_file, x)
 
     unstd.os.run(["podman", "kube", "down", pod_file])

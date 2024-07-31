@@ -43,5 +43,5 @@ def get_page_image_filepath(project_slug: str, page_slug: str) -> Path:
     This function must run within an app context.
     """
     import unstd.config
-    image_dir = Path(unstd.config.current.FLASK_UPLOAD_FOLDER) / "projects" / project_slug
+    image_dir = Path(unstd.config.current.FLASK_UPLOAD_DIR) / "projects" / project_slug
     return image_dir / "pages" / f"{page_slug}.jpg"
