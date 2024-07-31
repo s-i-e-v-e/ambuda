@@ -10,17 +10,15 @@ import ambuda.database as db
 import ambuda.scripts.analysis.dcs_utils as dcs
 from ambuda.seed.utils.data_utils import create_db
 
-from unstd.config import DCS_RAW_FILE_DIR
+import unstd.config
+DCS_RAW_FILE_DIR = f"{unstd.config.current.RAW_DATA_DIR}/ambuda-dcs-raw"
 
 def log(*a):
     print(*a)
 
 
 def iter_sections(dcs_text_name):
-    text_path = (
-        DCS_RAW_FILE_DIR
-        / f"{dcs_text_name}-all.conllu"
-    )
+    text_path = Path(f"{DCS_RAW_FILE_DIR}/{dcs_text_name}-all.conllu")
     yield from dcs.parse_file(text_path)
 
 

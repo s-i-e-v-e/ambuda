@@ -7,7 +7,8 @@ from pathlib import Path
 import ambuda.scripts.analysis.dcs_utils as dcs
 from ambuda.scripts.analysis.ramayana import get_kanda_and_sarga, map_and_write
 
-from unstd.config import DCS_RAW_FILE_DIR
+import unstd.config
+DCS_RAW_FILE_DIR = f"{unstd.config.current.RAW_DATA_DIR}/ambuda-dcs-raw"
 
 TITLE_MAP = {
     "MBh, 1": "1",
@@ -32,10 +33,7 @@ TITLE_MAP = {
 
 
 def iter_sections():
-    text_path = (
-        DCS_RAW_FILE_DIR
-        / "Mahābhārata"
-    )
+    text_path = Path(f"{DCS_RAW_FILE_DIR}/Mahābhārata")
     for section_path in sorted(text_path.iterdir()):
         for section in dcs.parse_file(section_path):
             yield section

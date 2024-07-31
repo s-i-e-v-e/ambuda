@@ -12,7 +12,7 @@ import unstd.os
 def __main():
     del sys.argv[0]
 
-    cmd = unstd.os.xs_next(sys.argv, "help")
+    cmd = unstd.os.next_arg(sys.argv, "help")
     # is_remote = cmd == 'remotely'
     # del sys.argv[0]
     #

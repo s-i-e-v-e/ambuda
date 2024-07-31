@@ -7,7 +7,9 @@ import requests
 from sqlalchemy import create_engine
 
 from ambuda import database as db
-from unstd.config import CACHE_DIR
+from pathlib import Path
+import unstd.config
+CACHE_DIR = Path(f"{unstd.config.current.RAW_DATA_DIR}/cache")
 
 def fetch_text(url: str, read_from_cache: bool = True) -> str:
     """Fetch text data against a simple cache.

@@ -65,7 +65,7 @@ def exit(code: int) -> None:
     sys.exit(code)
 
 
-def xs_next(xs, default) -> str:
+def next_arg(xs, default) -> str:
     x = xs[0] if len(xs) > 0 else default
     if len(xs) > 0:
         del xs[0]
@@ -73,10 +73,12 @@ def xs_next(xs, default) -> str:
 
 
 def next_arg_pair(xs: List[str]):
-    a = xs_next(xs, None)
-    b = xs_next(xs, None) if a else None
+    a = next_arg(xs, None)
+    b = next_arg(xs, None) if a else None
     return a, b
 
+def is_next_arg_an_opt(xs: List[str]) -> bool:
+    return xs[0].startswith('--') if len(xs) > 0 else False
 
 def get_git_sha() -> str:
     p = subprocess.run(

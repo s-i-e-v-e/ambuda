@@ -27,6 +27,7 @@ def __seed(xs):
             x.run()
         except Exception as e:
             print(f"Error: Unable to seed: {x.__name__}")
+            print(e)
 
 
 # Seed the database with a minimal dataset for CI. We fetch data only if it is

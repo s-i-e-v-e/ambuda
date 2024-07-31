@@ -1,9 +1,9 @@
 """Upload TEI documents from GRETIL."""
 
 import logging
+from pathlib import Path
 import subprocess
 from dataclasses import dataclass
-from pathlib import Path
 
 from sqlalchemy.orm import Session
 
@@ -20,8 +20,9 @@ class Spec:
 
 
 REPO = "https://github.com/ambuda-org/gretil.git"
-
-from unstd.config import GRETIL_DATA_DIR as DATA_DIR
+import unstd.os
+import unstd.config
+DATA_DIR = f"{unstd.config.current.RAW_DATA_DIR}/ambuda-gretil"
 
 #: Slug to use for texts that have only one section.
 
@@ -54,7 +55,7 @@ def log(*a):
 
 def fetch_latest_data():
     """Fetch the latest data from our GitHub repo."""
-    if not DATA_DIR.exists():
+    if not unstd.os.file_exists(DATA_DIR):
         subprocess.run(f"mkdir -p {DATA_DIR}", shell=True)
         subprocess.run(f"git clone --branch=main {REPO} {DATA_DIR}", shell=True)
 
@@ -91,7 +92,7 @@ def _create_new_text(session, spec: Spec, document: Document):
 
 
 def add_document(engine, spec: Spec):
-    document_path = DATA_DIR / "1_sanskr" / "tei" / spec.filename
+    document_path = Path(f"{DATA_DIR}/1_sanskr/tei/{spec.filename}")
 
     with Session(engine) as session:
         if session.query(db.Text).filter_by(slug=spec.slug).first():

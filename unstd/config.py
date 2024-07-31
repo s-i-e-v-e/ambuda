@@ -5,12 +5,6 @@ import unstd.os
 
 from pathlib import Path
 
-TMP_DIR = Path("/tmp") / "ambuda-seeding"
-GRETIL_DATA_DIR = TMP_DIR / "ambuda-gretil"
-DCS_DATA_DIR = TMP_DIR / "ambuda-dcs"
-DCS_RAW_FILE_DIR = TMP_DIR / "dcs-raw" / "files"
-CACHE_DIR = TMP_DIR / "download-cache"
-
 DEFAULT = "default"
 #: The test environment. For unit tests only.
 TESTING = "testing"
@@ -167,6 +161,8 @@ class ContainerConfig:
 
     # js/css - main + generated
     STATIC_DIR: str
+    # raw files (dict/dcs/gretil/etc)
+    RAW_DATA_DIR: str
     is_production: bool
     is_testing: bool
 
@@ -202,6 +198,7 @@ class ContainerConfig:
             self.AMBUDA_BOT_PASSWORD = dt["AMBUDA_BOT_PASSWORD"]
             self.GOOGLE_APPLICATION_CREDENTIALS = dt["GOOGLE_APPLICATION_CREDENTIALS"]
             self.STATIC_DIR = dt["STATIC_DIR"]
+            self.RAW_DATA_DIR = dt["RAW_DATA_DIR"]
             self.is_production = self.AMBUDA_ENVIRONMENT == PRODUCTION
             self.is_testing = self.AMBUDA_ENVIRONMENT == TESTING
 

@@ -17,7 +17,8 @@ def __get_image_names(os_name: str, cfg: unstd.config.HostConfig) -> List[str]:
     ]
 
 def __get_valid_os(args: List[str]):
-    os_name = args[0] if len(args) else "alpine"
+    os_name = "" if unstd.os.is_next_arg_an_opt(args) else unstd.os.next_arg(args, "")
+    os_name = os_name if os_name else "alpine"
     if not c_install.is_valid_os(os_name):
         print(f'Unsupported OS: {os_name}')
         unstd.os.exit(1)
@@ -58,6 +59,7 @@ def stage(args: List[str]):
     pod_file = f"/tmp/podman/{unstd.os.random_string()}.yml"
     unstd.os.copy_file("deploy/podman.yml", pod_file)
 
+    # pass arguments to init script
     xs = ["/app/ar", "container", "init"]
     for a in args:
         xs.append(a)

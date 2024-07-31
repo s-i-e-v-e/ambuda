@@ -64,7 +64,7 @@ Dispatchable = Dict[str, Callable[[List[str]], None]]
 
 def __main():
     del sys.argv[0]
-    cmd = unstd.os.xs_next(sys.argv, "help")
+    cmd = unstd.os.next_arg(sys.argv, "help")
     switch: Dispatchable = {
         "init": __init,
         "check": code.check,

@@ -73,7 +73,7 @@ def is_valid_os(os_name: str) -> bool:
 
 def __main(args: List[str]) -> None:
     del sys.argv[0]
-    cmd = unstd.os.xs_next(sys.argv, '')
+    cmd = unstd.os.next_arg(sys.argv, '')
     __install_on_os(cmd)
 
 if __name__ == '__main__':

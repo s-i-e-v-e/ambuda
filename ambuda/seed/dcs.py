@@ -7,7 +7,9 @@ import ambuda.database as db
 from ambuda.seed.utils.data_utils import create_db
 
 REPO = "https://github.com/ambuda-org/dcs.git"
-from unstd.config import DCS_DATA_DIR as DATA_DIR
+import unstd.os
+import unstd.config
+DATA_DIR = f"{unstd.config.current.RAW_DATA_DIR}/ambuda-dcs"
 
 class UpdateError(Exception):
     pass
@@ -21,7 +23,7 @@ def fetch_latest_data():
     """Fetch the latest data from the parse data repo."""
 
     print(f"Fetch from files from {REPO} to {DATA_DIR}")
-    if not DATA_DIR.exists():
+    if not unstd.os.file_exists(DATA_DIR):
         subprocess.run(f"mkdir -p {DATA_DIR}", shell=True)
         subprocess.run(f"git clone --branch=main {REPO} {DATA_DIR}", shell=True)
 
@@ -95,7 +97,7 @@ def run():
     fetch_latest_data()
 
     skipped = []
-    for path in DATA_DIR.iterdir():
+    for path in Path(DATA_DIR).iterdir():
         if path.suffix == ".txt":
             try:
                 add_parse_data(path.stem, path)
