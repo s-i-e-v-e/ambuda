@@ -1,13 +1,18 @@
+import sys
 import os
 import shutil
 import subprocess
-from typing import List
+from typing import List, Any
 
 
 def random_string() -> str:
     import uuid
 
     return uuid.uuid4().__str__()
+
+
+def copy(s, d):
+    shutil.copytree(s, d, dirs_exist_ok=True)
 
 
 def copy_file(s, d):
@@ -39,8 +44,8 @@ def cwd() -> str:
     return os.getcwd()
 
 
-def run(xs) -> bool:
-    return subprocess.run(xs).returncode == 0
+def run(xs, cwd: Any = None) -> bool:
+    return subprocess.run(xs, cwd=cwd).returncode == 0
 
 
 def rm(f):
@@ -82,3 +87,6 @@ def get_external_ip() -> str:
         "utf-8"
     )
     return x.split(" ")[6]
+
+def fix_venv():
+    os.environ['PYTHONPATH'] = f"/venv/lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages"

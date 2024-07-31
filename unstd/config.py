@@ -165,6 +165,8 @@ class ContainerConfig:
     # so we don't need to define it on the Config object here.
     GOOGLE_APPLICATION_CREDENTIALS: str
 
+    # js/css - main + generated
+    STATIC_DIR: str
     is_production: bool
     is_testing: bool
 
@@ -199,6 +201,7 @@ class ContainerConfig:
             self.TESTING = dt["TESTING"] == "True"
             self.AMBUDA_BOT_PASSWORD = dt["AMBUDA_BOT_PASSWORD"]
             self.GOOGLE_APPLICATION_CREDENTIALS = dt["GOOGLE_APPLICATION_CREDENTIALS"]
+            self.STATIC_DIR = dt["STATIC_DIR"]
             self.is_production = self.AMBUDA_ENVIRONMENT == PRODUCTION
             self.is_testing = self.AMBUDA_ENVIRONMENT == TESTING
 

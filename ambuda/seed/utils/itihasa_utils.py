@@ -3,14 +3,10 @@
 
 from collections.abc import Iterator
 from dataclasses import dataclass
-
-from dotenv import load_dotenv
 from indic_transliteration import sanscript
 from sqlalchemy.orm import Session
-
 import ambuda.database as db
 
-load_dotenv()
 
 @dataclass
 class Line:

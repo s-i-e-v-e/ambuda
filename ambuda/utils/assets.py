@@ -11,8 +11,8 @@ import hashlib
 from pathlib import Path
 
 from flask import current_app, url_for
-
-STATIC_DIR = Path(__file__).parent.parent / "static"
+import unstd.config
+STATIC_DIR = Path(unstd.config.current.STATIC_DIR)
 assert STATIC_DIR.exists(), "Could not find static directory."
 
 
