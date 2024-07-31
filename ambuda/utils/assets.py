@@ -13,7 +13,7 @@ from pathlib import Path
 from flask import current_app, url_for
 import unstd.config
 STATIC_DIR = Path(unstd.config.current.STATIC_DIR)
-assert STATIC_DIR.exists(), "Could not find static directory."
+assert STATIC_DIR.exists(), f"Could not find static directory: {STATIC_DIR}"
 
 
 @functools.cache

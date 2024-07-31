@@ -4,9 +4,10 @@
 import sys
 sys.path.extend(["./", "./ambuda", "./unstd"])
 
-from typing import List, Callable, Dict
-
 import unstd.os
+unstd.os.fix_venv()
+
+from typing import List, Callable, Dict
 import unstd.config
 import _yrun
 import db_initialize
@@ -40,9 +41,7 @@ def __start():
         # Build, Staging, and Production modes take this route. Load site static files that are within the container.
         unstd.os.run(
             [
-                "npx",
-                "concurrently",
-                f"flask run -h {cfg.AMBUDA_CONTAINER_IP} -p 5000",
+                "flask", "run", "-h", cfg.AMBUDA_CONTAINER_IP, "-p", "5000",
             ]
         )
 
@@ -64,7 +63,6 @@ Dispatchable = Dict[str, Callable[[List[str]], None]]
 
 
 def __main():
-    unstd.os.fix_venv()
     del sys.argv[0]
     cmd = unstd.os.xs_next(sys.argv, "help")
     switch: Dispatchable = {

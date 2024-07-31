@@ -1,0 +1,2 @@
+FROM archlinux as base
+RUN pacman -Syy && pacman -S --noconfirm python python-yaml bash which git curl redis nodejs npm tesseract-data-eng tesseract-data-hin tesseract-data-san

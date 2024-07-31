@@ -53,17 +53,17 @@ def __read_env(file, default_file) -> Dict[str, str]:
 
 class HostConfig:
     AMBUDA_VERSION: str
-    AMBUDA_IMAGE: str
-    AMBUDA_IMAGE_LATEST: str
+    GIT_BRANCH: str
+    GIT_SHA: str
     AMBUDA_HOST_IP: str
     AMBUDA_HOST_PORT: int
     AMBUDA_CONTAINER_NAME = "deploy-ambuda"
 
-    def __init__(self, git_sha: str, external_ip: str, dt: Dict[str, Any]) -> None:
+    def __init__(self, git_branch: str, git_sha: str, external_ip: str, dt: Dict[str, Any]) -> None:
         self.AMBUDA_VERSION = dt["AMBUDA_VERSION"]
         self.AMBUDA_HOST_PORT = dt["AMBUDA_HOST_PORT"]
-        self.AMBUDA_IMAGE = f"ambuda-release:{self.AMBUDA_VERSION}-{git_sha}"
-        self.AMBUDA_IMAGE_LATEST = "ambuda-release:latest"
+        self.GIT_BRANCH = git_branch
+        self.GIT_SHA = git_sha
         self.AMBUDA_HOST_IP = external_ip
 
 
@@ -275,6 +275,7 @@ def load_config_object(name: str):
 
 def read_host_config() -> HostConfig:
     return HostConfig(
+        unstd.os.get_git_branch(),
         unstd.os.get_git_sha(),
         unstd.os.get_external_ip(),
         __read_env("/data/ambuda/host.env", f"deploy/envars/host.env")

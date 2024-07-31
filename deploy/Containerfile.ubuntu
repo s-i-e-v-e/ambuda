@@ -1,0 +1,5 @@
+FROM ubuntu:rolling as base
+RUN apt-get update \
+    && apt-get --yes --allow-downgrades --allow-remove-essential --allow-change-held-packages dist-upgrade \
+    && apt-get --yes install python3 python3-yaml python-is-python3 python3-venv python3-setuptools bash which git curl redis nodejs npm
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh

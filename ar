@@ -1,8 +1,9 @@
 #!/bin/bash
 if [ "$1" == "install" ]; then
-  python `pwd`/runner/c.install.py
+  shift
+  python `pwd`/runner/c_install.py $*
 elif [ "$1" == "i18n" ]; then
-  python `pwd`/runner/c.i18n.py
+  python `pwd`/runner/c_i18n.py
 elif [ "$1" == "gh" ]; then
   python -m venv /tmp/venv
   PATH="/tmp/venv/bin:/bin:$PATH"

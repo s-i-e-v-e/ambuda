@@ -61,6 +61,10 @@ def extract_file_name(f) -> str:
     return xs.pop()
 
 
+def exit(code: int) -> None:
+    sys.exit(code)
+
+
 def xs_next(xs, default) -> str:
     x = xs[0] if len(xs) > 0 else default
     if len(xs) > 0:
@@ -81,12 +85,20 @@ def get_git_sha() -> str:
     return p.stdout.strip()
 
 
+def get_git_branch() -> str:
+    p = subprocess.run(
+        ["git", "branch", "--show-current"], capture_output=True, text=True
+    )
+    return p.stdout.strip()
+
+
 def get_external_ip() -> str:
     # return requests.get('https://checkip.amazonaws.com').text.strip()
     x = subprocess.run(["ip", "route", "get", "1"], capture_output=True).stdout.decode(
         "utf-8"
     )
     return x.split(" ")[6]
+
 
 def fix_venv():
     os.environ['PYTHONPATH'] = f"/venv/lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages"

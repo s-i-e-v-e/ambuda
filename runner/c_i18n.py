@@ -38,7 +38,5 @@ def generate(args: List[str]):
     unstd.os.make_dir(dest_dir)
     __copy_translation_files(src_dir, dest_dir)
 
-    print("Done.")
-
 
 generate([])

@@ -1,33 +1,59 @@
 #
 # Podman images and containers/pods
 #
-from typing import List, Optional
+import os
+from typing import List
 import unstd.os
 import unstd.config
+import c_install
 
 cfg = unstd.config.read_host_config()
 
-def build(args: List[str]):
-    os_name = args[0] if len(args) else "alpine"
-    print(F"podman: BUILDING {os_name}")
+def __get_image_names(os_name: str, cfg: unstd.config.HostConfig) -> List[str]:
+    base = f"ambuda-{cfg.GIT_BRANCH}-{os_name}"
+    return [
+        f"{base}:{cfg.AMBUDA_VERSION}-{cfg.GIT_SHA}",
+        f"{base}:latest",
+    ]
 
+def __get_valid_os(args: List[str]):
+    os_name = args[0] if len(args) else "alpine"
+    if not c_install.is_valid_os(os_name):
+        print(f'Unsupported OS: {os_name}')
+        unstd.os.exit(1)
+    return os_name
+
+
+def build(args: List[str]):
+    os_name = __get_valid_os(args)
+    [AMBUDA_IMAGE, AMBUDA_IMAGE_LATEST] = __get_image_names(os_name, cfg)
+    print(f"podman: BUILDING {os_name}")
+
+    of = "/tmp/podman/Containerfile"
+    a = unstd.os.read_file_as_string(f"deploy/Containerfile.{os_name}")
+    b = unstd.os.read_file_as_string("deploy/Containerfile.common")
+    c = a + b
+    c = c.replace("${OS_NAME}", os_name)
+    unstd.os.write_file_as_string(of, c)
     unstd.os.run(
         [
             "podman",
             "build",
             "--tag",
-            cfg.AMBUDA_IMAGE,
+            AMBUDA_IMAGE,
             "--tag",
-            cfg.AMBUDA_IMAGE_LATEST,
+            AMBUDA_IMAGE_LATEST,
             "-f",
-            f"deploy/Containerfile.{os_name}",
+            of,
             ".",
         ]
     )
 
 
 def stage(args: List[str]):
-    print("podman: STAGE")
+    os_name = __get_valid_os(args)
+    [AMBUDA_IMAGE, AMBUDA_IMAGE_LATEST] = __get_image_names(os_name, cfg)
+    print(f"podman: STAGING {os_name}")
 
     pod_file = f"/tmp/podman/{unstd.os.random_string()}.yml"
     unstd.os.copy_file("deploy/podman.yml", pod_file)
@@ -40,7 +66,7 @@ def stage(args: List[str]):
     cmd = f'[{", ".join(ys)}]'
 
     x = unstd.os.read_file_as_string(pod_file)
-    x = x.replace("${AMBUDA_IMAGE}", cfg.AMBUDA_IMAGE)
+    x = x.replace("${AMBUDA_IMAGE}", AMBUDA_IMAGE)
     x = x.replace("${AMBUDA_HOST_PORT}", str(cfg.AMBUDA_HOST_PORT))
     x = x.replace("${AMBUDA_HOST_IP}", cfg.AMBUDA_HOST_IP)
     x = x.replace("${PWD}", unstd.os.cwd())

@@ -1,94 +1,127 @@
 packages:
-  - alembic:
+  - celery:
     - py: $
-    - alpine: py3-$
-    - arch: python-$
-  - celery: []
+    - alpine: $
+    - arch: python-celery
+    - ubuntu: '' #$ version conflict
   - click:
     - py: $
     - alpine: py3-$
     - arch: python-$
+    - ubuntu: python3-$
   - conllu:
     - py: $
     - alpine: ''
     - arch: ''
+    - ubuntu: ''
   - dateutil:
     - py: python-$
     - alpine: py3-$
     - arch: python-$
+    - ubuntu: python3-$
   - fitz:
     - py: pymupdf
     - alpine: ''
     - arch: python-pymupdf
+    - ubuntu: python3-$
   - flask:
     - py: $
     - alpine: py3-$
     - arch: python-$
+    - ubuntu: python3-$
   - flask_admin:
     - py: $
     - alpine: ''
     - arch: ''
+    - ubuntu: ''
   - flask_babel:
     - py: $
     - alpine: py3-$
     - arch: python-$
+    - ubuntu: python3-$
   - flask_login:
     - py: $
     - alpine: py3-$
     - arch: python-$
+    - ubuntu: python3-$
   - flask_mail:
     - py: $
     - alpine: ''
     - arch: python-$
+    - ubuntu: python3-$
   - flask_wtf:
     - py: $
     - alpine: py3-$
     - arch: python-$
+    - ubuntu: python3-flaskext.wtf
   - google.cloud.vision:
     - py: $
     - alpine: ''
     - arch: ''
+    - ubuntu: ''
   - greenlet:
     - py: $
     - alpine: py3-$
     - arch: python-$
+    - ubuntu: python3-$
   - indic_transliteration:
     - py: $
     - alpine: ''
     - arch: ''
+    - ubuntu: ''
   - markdown_it:
     - py: $-py
     - alpine: py3-$-py
     - arch: python-$-py
+    - ubuntu: python3-$
   - markupsafe:
     - py: $
     - alpine: py3-$
     - arch: python-$
+    - ubuntu: python3-$
   - requests:
     - py: $
     - alpine: py3-$
     - arch: python-$
+    - ubuntu: python3-$
   - sentry_sdk:
     - py: $
-    - alpine: py3-sentry-sdk
+    - alpine: py3-$
     - arch: python-@
+    - ubuntu: python3-$
   - slugify:
     - py: $
     - alpine: py3-$
     - arch: python-$
+    - ubuntu: python3-$
   - sqlalchemy:
     - py: $
     - alpine: py3-$
     - arch: python-$
+    - ubuntu: python3-$
   - werkzeug:
     - py: $
     - alpine: py3-$
     - arch: python-$
+    - ubuntu: python3-$
   - wtforms:
     - py: $
     - alpine: py3-$
     - arch: python-$
+    - ubuntu: python3-$
   - wtforms_sqlalchemy:
     - py: $
     - alpine: ''
     - arch: ''
+    - ubuntu: '' #python3-wtforms-alchemy
+tools:
+  - alembic: # used on server
+      - py: $
+      - alpine: py3-$
+      - arch: python-$
+      - ubuntu: $
+  - pybabel: # used on server
+    - py: $
+    - alpine: py3-babel
+    - arch: python-babel
+    - ubuntu: python3-babel
