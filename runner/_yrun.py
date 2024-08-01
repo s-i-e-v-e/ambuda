@@ -1,10 +1,12 @@
 from typing import List
 
+from unstd import os
 
 def help(args: List[str]) -> None:
     print(
-        """
-    ambuda runner v0.1
+        f"""
+ambuda runner v0.1
+running on:{os.running_on()}
 usage:
     ar gh                                       generate github workflows
     ar build [*alpine/arch/ubuntu]              build ambuda image base on alpine/arch/ubuntu
