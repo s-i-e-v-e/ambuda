@@ -51,7 +51,7 @@ def __init(args: List[str]) -> None:
     seed_type = unstd.os.next_arg_pair(args)
 
     # Initialize SQLite database
-    db_initialize.run(cfg, seed_type[1] if seed_type[0] == "--seed" else None)
+    db_initialize.run(cfg, seed_type[1] if seed_type[0] == "--seed" else '')
 
     # Initialize Vidyut data
     vidyut_initialize.run(cfg)

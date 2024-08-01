@@ -96,9 +96,9 @@ def next_arg(xs: List[str], default: str) -> str:
     return x
 
 
-def next_arg_pair(xs: List[str]):
+def next_arg_pair(xs: List[str]) -> tuple[str, str]:
     a = next_arg(xs, '')
-    b = next_arg(xs, '') if a else None
+    b = next_arg(xs, '') if a else ''
     return a, b
 
 

@@ -52,7 +52,7 @@ def __test_with_coverage():
 
 
 def test(args: List[str]) -> None:
-    cv = unstd.os.next_arg(args, None)
+    cv = unstd.os.next_arg(args, '')
     if cv == "--coverage":
         __test_with_coverage()
     else:
