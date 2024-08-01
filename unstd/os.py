@@ -1,3 +1,5 @@
+from pathlib import Path
+import re
 import sys
 import os
 import shutil
@@ -43,8 +45,17 @@ def cwd() -> str:
     return os.getcwd()
 
 
+def home() -> str:
+    return os.environ['HOME']
+
+
 def run(xs: List[str], cwd: Any = None) -> bool:
     return subprocess.run(xs, cwd=cwd).returncode == 0
+
+
+def run_with_string_output(xs: List[str], cwd: Any = None) -> str:
+    p = subprocess.run(xs, capture_output=True, text=True, cwd=cwd)
+    return p.stdout.strip()
 
 
 def rm(f: str):
@@ -70,6 +81,10 @@ def extract_dir_path(x: str) -> str:
     return os.sep.join(xs)
 
 
+def path_is_absolute(x: str) -> bool:
+    return Path(x).expanduser().is_absolute()
+
+
 def exit(code: int) -> None:
     sys.exit(code)
 
@@ -86,21 +101,9 @@ def next_arg_pair(xs: List[str]):
     b = next_arg(xs, '') if a else None
     return a, b
 
+
 def is_next_arg_an_opt(xs: List[str]) -> bool:
     return xs[0].startswith('--') if len(xs) > 0 else False
-
-def get_git_sha() -> str:
-    p = subprocess.run(
-        ["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True
-    )
-    return p.stdout.strip()
-
-
-def get_git_branch() -> str:
-    p = subprocess.run(
-        ["git", "branch", "--show-current"], capture_output=True, text=True
-    )
-    return p.stdout.strip()
 
 
 def get_external_ip() -> str:

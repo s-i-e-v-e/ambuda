@@ -9,8 +9,8 @@ spec:
       image: ${AMBUDA_IMAGE}
       ports:
         - containerPort: 5000
-          hostPort: ${AMBUDA_HOST_PORT}
-          hostIP: "${AMBUDA_HOST_IP}"
+          hostPort: ${HOST_PORT}
+          hostIP: "${HOST_IP}"
           protocol: TCP
       resources: { }
       securityContext:
@@ -29,7 +29,7 @@ spec:
   volumes:
     - name: data
       hostPath:
-        path: ${HOME}/.local/share/ambuda
+        path: ${HOST_DATA_DIR}
         type: Directory
 #    - name: static
 #      hostPath:

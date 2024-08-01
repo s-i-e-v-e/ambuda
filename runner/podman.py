@@ -72,17 +72,17 @@ def stage(args: List[str]):
 
     x = unstd.os.read_file_as_string(pod_file)
     x = x.replace("${AMBUDA_IMAGE}", AMBUDA_IMAGE)
-    x = x.replace("${AMBUDA_HOST_PORT}", str(cfg.AMBUDA_HOST_PORT))
-    x = x.replace("${AMBUDA_HOST_IP}", cfg.AMBUDA_HOST_IP)
+    x = x.replace("${HOST_PORT}", str(cfg.HOST_PORT))
+    x = x.replace("${HOST_IP}", cfg.HOST_IP)
     x = x.replace("${PWD}", unstd.os.cwd())
     x = x.replace("${CMD}", cmd)
-    x = x.replace("${HOME}", os.environ['HOME'])
+    x = x.replace("${HOST_DATA_DIR}", cfg.HOST_DATA_DIR)
 
     unstd.os.write_file_as_string(pod_file, x)
 
     unstd.os.run(["podman", "kube", "down", pod_file])
     unstd.os.run(["podman", "kube", "play", pod_file])
-    unstd.os.run(["podman", "logs", "-f", cfg.AMBUDA_CONTAINER_NAME])
+    unstd.os.run(["podman", "logs", "-f", cfg.CONTAINER_NAME])
 
 
 def inspect(args: List[str]):
@@ -90,7 +90,7 @@ def inspect(args: List[str]):
         [
             "podman",
             "inspect",
-            cfg.AMBUDA_CONTAINER_NAME,
+            cfg.CONTAINER_NAME,
             "-f",
             "{{ .NetworkSettings.IPAddress }} {{ .NetworkSettings.Ports }}",
         ]
@@ -98,7 +98,7 @@ def inspect(args: List[str]):
 
 
 def kill(args: List[str]):
-    unstd.os.run(["podman", "kill", cfg.AMBUDA_CONTAINER_NAME])
+    unstd.os.run(["podman", "kill", cfg.CONTAINER_NAME])
 
 
 def destroy(args: List[str]):
@@ -111,4 +111,4 @@ def destroy(args: List[str]):
 def copy_to(args: List[str]):
     s = args[0]
     d = args[1]
-    unstd.os.run(["podman", "cp", s, f"{cfg.AMBUDA_CONTAINER_NAME}:{d}"])
+    unstd.os.run(["podman", "cp", s, f"{cfg.CONTAINER_NAME}:{d}"])

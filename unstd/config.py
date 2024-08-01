@@ -1,9 +1,7 @@
 import logging
 
 from typing import Dict, Any, Optional
-import unstd.os
-
-from pathlib import Path
+from unstd import git, os
 
 DEFAULT = "default"
 #: The test environment. For unit tests only.
@@ -15,14 +13,26 @@ STAGING = "staging"
 #: The production environment. For production serving.
 PRODUCTION = "production"
 
+DIR_LOCAL = f"{os.home()}/.local/share/ambuda"
+DIR_STD = "/data/ambuda"
+def __get_host_data_dir() -> str:
+    host_data_dir = DIR_STD
+    if not os.dir_exists(host_data_dir):
+        host_data_dir = DIR_LOCAL
+        if not os.dir_exists(host_data_dir):
+            os.make_dir(host_data_dir)
+        else:
+            pass
+    else:
+        pass
+    return host_data_dir
 
-def __read_env_file(name) -> Dict[str, str]:
+
+def __read_env_file(name: str) -> Dict[str, str]:
     m = dict()
-    #print(f"Reading {name}")
-    if not unstd.os.file_exists(name):
+    if not os.file_exists(name):
         return m
 
-    #print(f"SUCCESS {name}")
     with open(name, "r") as f:
         xs = [x.strip() for x in f.readlines()]
         xs = filter(lambda x: x and not x.startswith("#"), xs)
@@ -31,17 +41,20 @@ def __read_env_file(name) -> Dict[str, str]:
             m[x[0]] = x[1]
     return m
 
-
-def __read_env(file, default_file) -> Dict[str, str]:
+def __read_env(file: str, default_file: str) -> Dict[str, str]:
+    file_name = os.extract_file_name(file);
+    type = file_name.split(".")[0].upper()
     # load default
     m = __read_env_file(default_file)
 
     # override with one from file
-    n = __read_env_file(file)
-    for k in m.keys():
-        v = n[k] if k in n.keys() else m[k]
-        #print(f"{k} = {v} {f'({m[k]})' if k in n.keys() else ''}")
-        m[k] = v
+    n = __read_env_file(file) if os.file_exists(file) else None
+    if not n:
+        logging.warning(f"{type} config: going with defaults. If you have defined a custom config,\nplease put it in {DIR_LOCAL}/{file_name} or {DIR_STD}/{file_name}")
+    else:
+        for k in m.keys():
+            v = n[k] if k in n.keys() else m[k]
+            m[k] = v
     return m
 
 
@@ -49,16 +62,18 @@ class HostConfig:
     AMBUDA_VERSION: str
     GIT_BRANCH: str
     GIT_SHA: str
-    AMBUDA_HOST_IP: str
-    AMBUDA_HOST_PORT: int
-    AMBUDA_CONTAINER_NAME = "deploy-ambuda"
+    HOST_DATA_DIR: str
+    HOST_IP: str
+    HOST_PORT: int
+    CONTAINER_NAME = "deploy-ambuda"
 
-    def __init__(self, git_branch: str, git_sha: str, external_ip: str, dt: Dict[str, Any]) -> None:
+    def __init__(self, host_data_dir, git_branch: str, git_sha: str, external_ip: str, dt: Dict[str, Any]) -> None:
         self.AMBUDA_VERSION = dt["AMBUDA_VERSION"]
-        self.AMBUDA_HOST_PORT = dt["AMBUDA_HOST_PORT"]
+        self.HOST_DATA_DIR = host_data_dir
+        self.HOST_PORT = dt["HOST_PORT"]
         self.GIT_BRANCH = git_branch
         self.GIT_SHA = git_sha
-        self.AMBUDA_HOST_IP = external_ip
+        self.HOST_IP = external_ip
 
 
 class ContainerConfig:
@@ -219,10 +234,10 @@ def __validate_config(config: ContainerConfig):
         raise ValueError("This config does not define SQLALCHEMY_DATABASE_URI")
 
     if not config.FLASK_UPLOAD_DIR:
-        raise ValueError("This config does not define FLASK_UPLOAD_FOLDER.")
+        raise ValueError("This config does not define FLASK_UPLOAD_DIR.")
 
-    if not Path(config.FLASK_UPLOAD_DIR).is_absolute():
-        raise ValueError("FLASK_UPLOAD_FOLDER must be an absolute path.")
+    if not os.path_is_absolute(config.FLASK_UPLOAD_DIR):
+        raise ValueError("FLASK_UPLOAD_DIR must be an absolute path.")
 
     if not config.VIDYUT_DATA_DIR:
         print(
@@ -252,7 +267,7 @@ def __validate_config(config: ContainerConfig):
         # Google credentials must be set and exist.
         google_creds = config.GOOGLE_APPLICATION_CREDENTIALS
         assert google_creds
-        assert Path(google_creds).exists()
+        assert os.file_exists(google_creds)
 
 
 def __get_container_config_for(x: str) -> ContainerConfig:
@@ -272,10 +287,11 @@ def load_config_object(name: str):
 
 def read_host_config() -> HostConfig:
     return HostConfig(
-        unstd.os.get_git_branch(),
-        unstd.os.get_git_sha(),
-        unstd.os.get_external_ip(),
-        __read_env("~/.local/share/ambuda/host.env", f"deploy/envars/host.env")
+        __get_host_data_dir(),
+        git.current_branch(),
+        git.head_sha(),
+        "127.0.0.1",
+        __read_env(f"{__get_host_data_dir()}/host.env", f"deploy/envars/host.env")
     )
 
 
