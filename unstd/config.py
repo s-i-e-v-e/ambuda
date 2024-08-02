@@ -58,6 +58,19 @@ def __read_env(file: str, default_file: str) -> Dict[str, str]:
     return m
 
 
+class RemoteHostConfig:
+    REMOTE_HOST: str
+    REMOTE_PORT: str
+    REMOTE_USER: str
+    SSH_KEY_OR_FILE: str
+
+    def __init__(self, dt: Dict[str, str]) -> None:
+        self.REMOTE_HOST = dt["REMOTE_HOST"]
+        self.REMOTE_PORT = dt["REMOTE_PORT"]
+        self.REMOTE_USER = dt["REMOTE_USER"]
+        self.SSH_KEY_OR_FILE = dt["SSH_KEY_OR_FILE"]
+
+
 class HostConfig:
     AMBUDA_VERSION: str
     GIT_BRANCH: str
@@ -285,6 +298,12 @@ def load_config_object(name: str):
     return config
 
 
+def read_remote_host_config() -> RemoteHostConfig:
+    return RemoteHostConfig(
+        __read_env(f"{__get_host_data_dir()}/remote-host.env", f"deploy/envars/remote-host.env")
+    )
+
+
 def read_host_config() -> HostConfig:
     return HostConfig(
         __get_host_data_dir(),
@@ -296,10 +315,7 @@ def read_host_config() -> HostConfig:
 
 
 def read_container_config() -> ContainerConfig:
-    # Will always load conservative envars by default
-    # Can be overridden by changing values in /data/container.env
     config = __get_container_config_for(DEFAULT)
-
     __validate_config(config)
     return config
 

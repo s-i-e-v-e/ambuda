@@ -1,10 +1,9 @@
 from pathlib import Path
-import re
 import sys
 import os
 import shutil
 import subprocess
-from typing import List, Any
+from typing import List, Any, Dict, Callable
 
 
 def random_string() -> str:
@@ -131,3 +130,11 @@ def running_on() -> str:
     xs = lines.split('\n')
 
     return ''.join(filter(lambda x: x.startswith('ID='), xs)).split('=')[1]
+
+
+Command = Callable[[List[str]], None]
+Dispatchable = Dict[str, Command]
+
+
+def switch(cmd: str, default_cmd: Command, map: Dispatchable) -> Command:
+    return map.get(cmd, default_cmd)

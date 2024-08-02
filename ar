@@ -11,6 +11,11 @@ elif [ "$1" == "container" ]; then
   export PYTHONUNBUFFERED=1
   shift
   python `pwd`/runner/run_on_container.py $*
+elif [ "$1" == "remote" ]; then
+  export PYTHONFAULTHANDLER=1
+  export PYTHONUNBUFFERED=1
+  shift
+  python `pwd`/runner/run_on_remote_host.py $*
 else
   python `pwd`/runner/run_on_host.py $*
 fi

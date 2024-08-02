@@ -5,12 +5,12 @@ from dotenv import load_dotenv
 from fabric import Connection, task
 
 load_dotenv()
-APP_DIRECTORY = Path(os.environ["SERVER_APP_DIRECTORY"])
-UPLOADS_DIRECTORY = Path(os.environ["SERVER_UPLOADS_DIRECTORY"])
-SECRETS_DIRECTORY = Path(os.environ["SERVER_SECRETS_DIRECTORY"])
+APP_DIRECTORY = Path(os.environ["REMOTE_APP_DIRECTORY"])
+UPLOADS_DIRECTORY = Path(os.environ["REMOTE_UPLOADS_DIRECTORY"])
+SECRETS_DIRECTORY = Path(os.environ["REMOTE_SECRETS_DIRECTORY"])
 
-USER = os.environ["SERVER_USER"]
-HOST = os.environ["SERVER_HOST"]
+USER = os.environ["REMOTE_USER"]
+HOST = os.environ["REMOTE_HOST"]
 
 r = Connection(f"root@{HOST}")
 c = Connection(f"{USER}@{HOST}")

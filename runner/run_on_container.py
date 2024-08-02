@@ -1,7 +1,6 @@
-from typing import List, Callable, Dict
+from typing import List
 import sys
 sys.path.extend(["./", "./ambuda", "./unstd"])
-
 from unstd import config, os
 os.fix_venv()
 from container import vidyut_initialize, db_initialize, verify
@@ -51,19 +50,15 @@ def __init(args: List[str]) -> None:
     __start()
 
 
-Dispatchable = Dict[str, Callable[[List[str]], None]]
-
-
 def __main(args: List[str]) -> None:
-    print(args)
     del args[0]
     cmd = os.next_arg(args, "help")
-    switch: Dispatchable = {
-        "init": __init,
-        "verify": verify.verify,
-        "help": help.run,
-    }
-    f = switch.get(cmd, help.none)
+    f = os.switch(cmd, help.none,
+        {
+            "init": __init,
+            "verify": verify.verify,
+            "help": help.run,
+        })
     f(args)
 
 
