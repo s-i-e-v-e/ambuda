@@ -1,18 +1,15 @@
-#
-# RUNS ON VPS/VM/LOCAL
-#
 import sys
 sys.path.extend(["./", "./ambuda", "./unstd"])
 
-import podman
-import _yrun
-import unstd.os
+from host import podman
+from unstd import os
+import help
 
 
 def __main():
     del sys.argv[0]
 
-    cmd = unstd.os.next_arg(sys.argv, "help")
+    cmd = os.next_arg(sys.argv, "help")
     # is_remote = cmd == 'remotely'
     # del sys.argv[0]
     #
@@ -33,16 +30,10 @@ def __main():
         "destroy": podman.destroy,
         "kill": podman.kill,
         "copy-to": podman.copy_to,
-        "help": _yrun.help,
+        "help": help.run,
     }
-    f = switch.get(cmd, _yrun.help)
+    f = switch.get(cmd, help.run)
     f(sys.argv)
-
-
-# Generate Ambuda's technical documentation.
-# After the command completes, open "docs/_build/index.html".
-
-########	cd docs && make html
 
 
 __main()

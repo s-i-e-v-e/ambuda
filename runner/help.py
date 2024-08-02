@@ -2,7 +2,7 @@ from typing import List
 
 from unstd import os
 
-def help(args: List[str]) -> None:
+def run(args: List[str]) -> None:
     print(
         f"""
 ambuda runner v0.1

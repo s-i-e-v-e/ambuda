@@ -11,7 +11,7 @@ import unstd.config
 import unstd.os
 from ambuda import database as db
 from ambuda.seed import lookup
-import seeding
+from container import seeding
 
 
 def get_db_file_path(sql_uri: str) -> str:

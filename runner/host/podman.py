@@ -1,11 +1,10 @@
 #
 # Podman images and containers/pods
 #
-import os
 from typing import List
 import unstd.os
 import unstd.config
-import c_install
+from container import install
 
 cfg = unstd.config.read_host_config()
 PODMAN_DIR = f"/{unstd.os.get_tmp_dir()}/podman"

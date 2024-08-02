@@ -1,26 +1,18 @@
-#
-# RUNS ON CONTAINER WHEN DEPLOYMENT IS TRIGGERED
-#
+from typing import List, Callable, Dict
 import sys
 sys.path.extend(["./", "./ambuda", "./unstd"])
 
-import unstd.os
-unstd.os.fix_venv()
+from unstd import config, os
+os.fix_venv()
+from container import vidyut_initialize, db_initialize, verify, code
+import help
 
-from typing import List, Callable, Dict
-import unstd.config
-import _yrun
-import db_initialize
-import vidyut_initialize
-import verify
-from runner import code
-
-cfg = unstd.config.read_container_config()
+cfg = config.read_container_config()
 
 
 def __start():
-    unstd.os.run(["redis-server", "--port", cfg.REDIS_PORT, "--daemonize", "yes"])
-    unstd.os.run(["celery", "--app", "ambuda.tasks", "worker", "--detach", "--loglevel=INFO"])
+    os.run(["redis-server", "--port", cfg.REDIS_PORT, "--daemonize", "yes"])
+    os.run(["celery", "--app", "ambuda.tasks", "worker", "--detach", "--loglevel=INFO"])
 
     print("podman: FLASK START")
     print(f"{cfg.FLASK_ENV} Flask start @ {cfg.AMBUDA_CONTAINER_IP}:5000")
@@ -28,7 +20,7 @@ def __start():
     if cfg.FLASK_ENV == "development":
         # Start flask server in development mode
         # Dynamically load css and js changes. Docker compose attaches to the ./static directory on localhost.
-        unstd.os.run(
+        os.run(
             [
                 "npx",
                 "concurrently",
@@ -39,7 +31,7 @@ def __start():
         )
     else:
         # Build, Staging, and Production modes take this route. Load site static files that are within the container.
-        unstd.os.run(
+        os.run(
             [
                 "flask", "run", "-h", cfg.AMBUDA_CONTAINER_IP, "-p", "5000",
             ]
@@ -48,7 +40,7 @@ def __start():
 
 def __init(args: List[str]) -> None:
     print("podman: INIT")
-    seed_type = unstd.os.next_arg_pair(args)
+    seed_type = os.next_arg_pair(args)
 
     # Initialize SQLite database
     db_initialize.run(cfg, seed_type[1] if seed_type[0] == "--seed" else '')
@@ -64,16 +56,16 @@ Dispatchable = Dict[str, Callable[[List[str]], None]]
 
 def __main():
     del sys.argv[0]
-    cmd = unstd.os.next_arg(sys.argv, "help")
+    cmd = os.next_arg(sys.argv, "help")
     switch: Dispatchable = {
         "init": __init,
         "check": code.check,
         "test": code.test,
         "lint": code.lint,
         "verify": verify.verify,
-        "help": _yrun.help,
+        "help": help.run,
     }
-    f = switch.get(cmd, _yrun.none)
+    f = switch.get(cmd, help.none)
     f(sys.argv)
 
 

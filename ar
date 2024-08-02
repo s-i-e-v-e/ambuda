@@ -1,20 +1,16 @@
 #!/bin/bash
 if [ "$1" == "install" ]; then
   shift
-  python `pwd`/runner/c_install.py $*
+  python `pwd`/runner/container/install.py $*
 elif [ "$1" == "i18n" ]; then
-  python `pwd`/runner/c_i18n.py
+  python `pwd`/runner/container/i18n.py
 elif [ "$1" == "gh" ]; then
-  python -m venv /tmp/venv
-  PATH="/tmp/venv/bin:/bin:$PATH"
-  source /tmp/venv/bin/activate
-  pip install -q PyYAML
-  python `pwd`/runner/v.gh.py
+  python `pwd`/runner/host/github.py
 elif [ "$1" == "container" ]; then
   export PYTHONFAULTHANDLER=1
   export PYTHONUNBUFFERED=1
   shift
-  python `pwd`/runner/yrunc.py $*
+  python `pwd`/runner/run_on_container.py $*
 else
-  python `pwd`/runner/yrunv.py $*
+  python `pwd`/runner/run_on_host.py $*
 fi
