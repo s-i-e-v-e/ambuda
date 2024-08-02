@@ -190,7 +190,7 @@ class ContainerConfig:
             self.SECRET_KEY = dt["SECRET_KEY"]
             self.SQLALCHEMY_DATABASE_URI = dt["SQLALCHEMY_DATABASE_URI"]
             self.AMBUDA_CONTAINER_IP = dt["AMBUDA_CONTAINER_IP"]
-            self.FLASK_UPLOAD_DIR = dt["FLASK_UPLOAD_FOLDER"]
+            self.FLASK_UPLOAD_DIR = dt["FLASK_UPLOAD_DIR"]
             self.VIDYUT_DATA_DIR = dt["VIDYUT_DATA_DIR"]
             self.VIDYUT_DATA_URL = dt["VIDYUT_DATA_URL"]
             self.LOG_LEVEL = logging.getLevelNamesMapping()[dt["LOG_LEVEL"]]

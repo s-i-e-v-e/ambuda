@@ -94,7 +94,7 @@ def create_project(title, pdf_path):
 
         slug = slugify(title)
         page_image_dir = (
-            Path(current_app.config["UPLOAD_FOLDER"]) / "projects" / slug / "pages"
+            Path(current_app.config["FLASK_UPLOAD_DIR"]) / "projects" / slug / "pages"
         )
         page_image_dir.mkdir(parents=True, exist_ok=True)
         create_project_inner(

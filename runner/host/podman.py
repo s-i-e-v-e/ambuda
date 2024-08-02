@@ -1,51 +1,47 @@
-#
-# Podman images and containers/pods
-#
 from typing import List
-import unstd.os
-import unstd.config
+from unstd import config, os
 from container import install
 
-cfg = unstd.config.read_host_config()
-PODMAN_DIR = f"/{unstd.os.get_tmp_dir()}/podman"
 
-def __get_image_names(os_name: str, cfg: unstd.config.HostConfig) -> List[str]:
-    base = f"ambuda-{cfg.GIT_BRANCH}-{os_name}"
-    return [
-        f"{base}:{cfg.AMBUDA_VERSION}-{cfg.GIT_SHA}",
-        f"{base}:latest",
-    ]
+def __get_image_names(os_name: str, hc: config.HostConfig) -> tuple[str, str]:
+    base = f"ambuda-{hc.GIT_BRANCH}-{os_name}"
+    return f"{base}:{hc.AMBUDA_VERSION}-{hc.GIT_SHA}", f"{base}:latest"
+
 
 def __get_valid_os(args: List[str]):
-    os_name = "" if unstd.os.is_next_arg_an_opt(args) else unstd.os.next_arg(args, "")
+    os_name = "" if os.is_next_arg_an_opt(args) else os.next_arg(args, "")
     os_name = os_name if os_name else "alpine"
-    if not c_install.is_valid_os(os_name):
+    if not install.is_valid_os(os_name):
         print(f'Unsupported OS: {os_name}')
-        unstd.os.exit(1)
+        os.exit(1)
     return os_name
+
+
+cfg = config.read_host_config()
+PODMAN_DIR = f"/{os.get_tmp_dir()}/podman"
 
 
 def build(args: List[str]):
     os_name = __get_valid_os(args)
-    [AMBUDA_IMAGE, AMBUDA_IMAGE_LATEST] = __get_image_names(os_name, cfg)
+    ambuda_image, ambuda_image_latest = __get_image_names(os_name, cfg)
     print(f"podman: BUILDING {os_name}")
 
-    unstd.os.make_dir(PODMAN_DIR)
+    os.make_dir(PODMAN_DIR)
     of = f"{PODMAN_DIR}/Containerfile"
 
-    a = unstd.os.read_file_as_string(f"deploy/Containerfile.{os_name}")
-    b = unstd.os.read_file_as_string("deploy/Containerfile.common")
+    a = os.read_file_as_string(f"deploy/Containerfile.{os_name}")
+    b = os.read_file_as_string("deploy/Containerfile.common")
     c = a + b
     c = c.replace("${OS_NAME}", os_name)
-    unstd.os.write_file_as_string(of, c)
-    unstd.os.run(
+    os.write_file_as_string(of, c)
+    os.run(
         [
             "podman",
             "build",
             "--tag",
-            AMBUDA_IMAGE,
+            ambuda_image,
             "--tag",
-            AMBUDA_IMAGE_LATEST,
+            ambuda_image_latest,
             "-f",
             of,
             ".",
@@ -55,11 +51,11 @@ def build(args: List[str]):
 
 def stage(args: List[str]):
     os_name = __get_valid_os(args)
-    [AMBUDA_IMAGE, AMBUDA_IMAGE_LATEST] = __get_image_names(os_name, cfg)
+    ambuda_image, _ = __get_image_names(os_name, cfg)
     print(f"podman: STAGING {os_name}")
 
     pod_file = f"/{PODMAN_DIR}/podman.yml"
-    unstd.os.copy_file("deploy/podman.yml", pod_file)
+    os.copy_file("deploy/podman.yml", pod_file)
 
     # pass arguments to init script
     xs = ["/app/ar", "container", "init"]
@@ -69,23 +65,23 @@ def stage(args: List[str]):
     ys = [f'"{str(a)}"' for a in xs]
     cmd = f'[{", ".join(ys)}]'
 
-    x = unstd.os.read_file_as_string(pod_file)
-    x = x.replace("${AMBUDA_IMAGE}", AMBUDA_IMAGE)
+    x = os.read_file_as_string(pod_file)
+    x = x.replace("${AMBUDA_IMAGE}", ambuda_image)
     x = x.replace("${HOST_PORT}", str(cfg.HOST_PORT))
     x = x.replace("${HOST_IP}", cfg.HOST_IP)
-    x = x.replace("${PWD}", unstd.os.cwd())
+    x = x.replace("${PWD}", os.cwd())
     x = x.replace("${CMD}", cmd)
     x = x.replace("${HOST_DATA_DIR}", cfg.HOST_DATA_DIR)
 
-    unstd.os.write_file_as_string(pod_file, x)
+    os.write_file_as_string(pod_file, x)
 
-    unstd.os.run(["podman", "kube", "down", pod_file])
-    unstd.os.run(["podman", "kube", "play", pod_file])
-    unstd.os.run(["podman", "logs", "-f", cfg.CONTAINER_NAME])
+    os.run(["podman", "kube", "down", pod_file])
+    os.run(["podman", "kube", "play", pod_file])
+    os.run(["podman", "logs", "-f", cfg.CONTAINER_NAME])
 
 
 def inspect(args: List[str]):
-    unstd.os.run(
+    os.run(
         [
             "podman",
             "inspect",
@@ -97,11 +93,11 @@ def inspect(args: List[str]):
 
 
 def kill(args: List[str]):
-    unstd.os.run(["podman", "kill", cfg.CONTAINER_NAME])
+    os.run(["podman", "kill", cfg.CONTAINER_NAME])
 
 
 def destroy(args: List[str]):
-    unstd.os.run(["podman", "image", "rm", "-a", "-f"])
+    os.run(["podman", "image", "rm", "-a", "-f"])
     # kill(args)
     # unstd.os.run(['podman', 'pod', 'rm', '-a', '-f'])
     # unstd.os.run(['podman', 'container', 'rm', '-a', '-f'])
@@ -110,4 +106,4 @@ def destroy(args: List[str]):
 def copy_to(args: List[str]):
     s = args[0]
     d = args[1]
-    unstd.os.run(["podman", "cp", s, f"{cfg.CONTAINER_NAME}:{d}"])
+    os.run(["podman", "cp", s, f"{cfg.CONTAINER_NAME}:{d}"])
