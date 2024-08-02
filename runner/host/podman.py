@@ -107,3 +107,10 @@ def copy_to(args: List[str]):
     s = args[0]
     d = args[1]
     os.run(["podman", "cp", s, f"{cfg.CONTAINER_NAME}:{d}"])
+
+
+def exec(args: List[str]):
+    xs = []
+    xs.extend(["podman", "exec", cfg.CONTAINER_NAME, "/app/ar", "container"])
+    xs.extend(args)
+    os.run(xs)

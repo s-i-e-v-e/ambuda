@@ -9,6 +9,7 @@ from unstd import config
 
 
 def verify(args: List[str]):
+    print('verifying env')
     e, v = unstd.os.next_arg_pair(args)
     if e == "--env":
         if v in [config.PRODUCTION, config.STAGING, config.DEVELOPMENT]:
@@ -16,3 +17,5 @@ def verify(args: List[str]):
             app = create_config_only_app(v)
         else:
             raise Exception(f"Unknown environment: {v}")
+    else:
+        raise Exception("Environment not provided")

@@ -33,4 +33,4 @@ usage:
 
 
 def none(args: List[str]) -> None:
-    pass
+    print('Unknown argument')

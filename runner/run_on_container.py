@@ -4,7 +4,7 @@ sys.path.extend(["./", "./ambuda", "./unstd"])
 
 from unstd import config, os
 os.fix_venv()
-from container import vidyut_initialize, db_initialize, verify, code
+from container import vidyut_initialize, db_initialize, verify
 import help
 
 cfg = config.read_container_config()
@@ -54,19 +54,17 @@ def __init(args: List[str]) -> None:
 Dispatchable = Dict[str, Callable[[List[str]], None]]
 
 
-def __main():
-    del sys.argv[0]
-    cmd = os.next_arg(sys.argv, "help")
+def __main(args: List[str]) -> None:
+    print(args)
+    del args[0]
+    cmd = os.next_arg(args, "help")
     switch: Dispatchable = {
         "init": __init,
-        "check": code.check,
-        "test": code.test,
-        "lint": code.lint,
         "verify": verify.verify,
         "help": help.run,
     }
     f = switch.get(cmd, help.none)
-    f(sys.argv)
+    f(args)
 
 
-__main()
+__main(sys.argv)

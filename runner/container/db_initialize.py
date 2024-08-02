@@ -3,14 +3,11 @@
 #
 
 import subprocess
-from pathlib import Path
 
-from sqlalchemy import create_engine
-
-import unstd.config
-import unstd.os
+from unstd import config, os
 from ambuda import database as db
 from ambuda.seed import lookup
+from sqlalchemy import create_engine
 from container import seeding
 
 
@@ -69,7 +66,7 @@ def alembic_migrations():
 
 def load_database(db_file_path: str):
     """Database already initialized. Run lookup module (TODO: Legacy step. Check why?). Update to the latest migration."""
-    if not Path(db_file_path).exists():
+    if not os.file_exists(db_file_path):
         print(f"Database not found at {db_file_path}...")
         raise FileNotFoundError("Database file not found")
 
@@ -82,7 +79,7 @@ def load_database(db_file_path: str):
         raise load_ex
 
 
-def run(cfg: unstd.config.ContainerConfig, seed_type: str):
+def run(cfg: config.ContainerConfig, seed_type: str):
     """
     Initialize db for fresh installs. Load db on restarts.
     Return value is boolean as the caller is a shell script.
@@ -95,7 +92,7 @@ def run(cfg: unstd.config.ContainerConfig, seed_type: str):
         print(f"Failed to get db path - {err}")
         return False
 
-    if unstd.os.file_exists(db_file_path):
+    if os.file_exists(db_file_path):
         print(f"Database found at {db_file_path}..")
         try:
             load_database(db_file_path)
