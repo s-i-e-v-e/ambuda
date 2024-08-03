@@ -1,2 +1,0 @@
-FROM alpine:edge as base
-RUN apk update && apk add --no-cache python3 py3-yaml bash which git curl redis nodejs npm

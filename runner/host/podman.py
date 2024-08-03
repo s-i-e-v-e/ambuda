@@ -29,8 +29,8 @@ def build(args: List[str]):
     os.make_dir(PODMAN_DIR)
     of = f"{PODMAN_DIR}/Containerfile"
 
-    a = os.read_file_as_string(f"deploy/Containerfile.{os_name}")
-    b = os.read_file_as_string("deploy/Containerfile.common")
+    a = os.read_file_as_string(f"deploy/containers/Containerfile.{os_name}")
+    b = os.read_file_as_string("deploy/containers/Containerfile.common")
     c = a + b
     c = c.replace("${OS_NAME}", os_name)
     os.write_file_as_string(of, c)
@@ -55,7 +55,7 @@ def stage(args: List[str]):
     print(f"podman: STAGING {os_name}")
 
     pod_file = f"/{PODMAN_DIR}/podman.yml"
-    os.copy_file("deploy/podman.yml", pod_file)
+    os.copy_file("deploy/containers/podman.yml", pod_file)
 
     # pass arguments to init script
     xs = ["/app/ar", "container", "init"]

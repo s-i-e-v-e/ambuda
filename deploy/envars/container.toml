@@ -1,0 +1,73 @@
+[default]
+# General
+AMBUDA_ENVIRONMENT = "staging"
+BABEL_DEFAULT_LOCALE = "en"
+
+# Data and File storage
+VIDYUT_DATA_DIR = "/data/vidyut"
+VIDYUT_DATA_URL = "https://github.com/ambuda-org/vidyut-py/releases/download/0.2.0/data-0.2.0.zip"
+FLASK_UPLOAD_DIR = "/data/uploads"
+SQLALCHEMY_DATABASE_URI = "sqlite:////data/database/database.db"
+
+# Mail Config
+MAIL_SERVER = ""
+MAIL_PORT = ""
+MAIL_USERNAME = ""
+MAIL_PASSWORD = ""
+MAIL_DEFAULT_SENDER = ""
+MAIL_USE_TLS = true
+
+WTF_CSRF_ENABLED = true
+
+# Debug/Testing
+DEBUG = false
+TESTING = false
+LOG_LEVEL = "INFO"
+
+# Redis
+REDIS_PORT = 6579
+REDIS_HOST = "localhost"
+
+#: If set, automatically reload Flask templates (including imports) when
+#: they change on disk.
+TEMPLATES_AUTO_RELOAD = false
+
+# API keys
+SECRET_KEY = "insecure development secret key"
+GOOGLE_APPLICATION_CREDENTIALS = "<Google API credentials>"
+RECAPTCHA_PUBLIC_KEY = ""
+RECAPTCHA_PRIVATE_KEY = ""
+SENTRY_DSN = ""
+
+AMBUDA_BOT_PASSWORD = "insecure bot password"
+AMBUDA_CONTAINER_IP = "0.0.0.0"
+STATIC_DIR = "/app/static"
+RAW_DATA_DIR = "/data/raw"
+
+[development]
+AMBUDA_ENVIRONMENT = "development"
+DEBUG = true
+#: If set, automatically reload Flask templates (including imports) when
+#: they change on disk.
+TEMPLATES_AUTO_RELOAD = true
+
+[production]
+AMBUDA_ENVIRONMENT = "production"
+
+[staging]
+AMBUDA_ENVIRONMENT = "staging"
+DEBUG = true
+
+[testing]
+AMBUDA_ENVIRONMENT = "testing"
+TESTING = true
+SECRET_KEY = "insecure unit test secret"
+SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+LOG_LEVEL = "DEBUG"
+
+#: Disable CSRF protection for unit tests, since the Flask test runner
+#: doesn't have good support for it.
+WTF_CSRF_ENABLED = false
+
+RECAPTCHA_PUBLIC_KEY = "re-public"
+RECAPTCHA_PRIVATE_KEY = "re-private"

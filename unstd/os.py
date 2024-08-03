@@ -4,7 +4,7 @@ import os
 import shutil
 import subprocess
 from typing import List, Any, Dict, Callable
-
+import toml
 
 def random_string() -> str:
     import uuid
@@ -20,6 +20,14 @@ def copy_file(s: str, d: str):
     dir_path = extract_dir_path(d)
     os.makedirs(dir_path, exist_ok=True)
     shutil.copyfile(s, d)
+
+
+def read_toml(path: str) -> Dict[str, Any]:
+    return toml.load(path)
+
+
+def write_toml(path: str, data: Dict[str, Any]):
+    toml.dump(data, path)
 
 
 def read_file_as_string(p: str) -> str:

@@ -99,6 +99,11 @@ packages:
     - alpine: py3-$
     - arch: python-$
     - ubuntu: python3-$
+  - toml:
+    - py: $
+    - alpine: py3-$
+    - arch: python-$
+    - ubuntu: python3-$
   - werkzeug:
     - py: $
     - alpine: py3-$
@@ -125,3 +130,14 @@ tools:
     - alpine: py3-babel
     - arch: python-babel
     - ubuntu: python3-babel
+build:
+  - toml:
+      - py: $
+      - alpine: py3-$
+      - arch: python-$
+      - ubuntu: python3-$
+  - yaml:
+      - py: $
+      - alpine: py3-$
+      - arch: python-$
+      - ubuntu: python3-$

@@ -28,24 +28,16 @@ def __get_host_data_dir() -> str:
     return host_data_dir
 
 
-def __read_env_file(name: str) -> Dict[str, str]:
-    m = dict()
-    if not os.file_exists(name):
-        return m
+def __read_env_file(path: str) -> Dict[str, str]:
+    return os.read_toml(path) if os.file_exists(path) else dict()
 
-    with open(name, "r") as f:
-        xs = [x.strip() for x in f.readlines()]
-        xs = filter(lambda x: x and not x.startswith("#"), xs)
-        xs = [x.split("=") for x in xs]
-        for x in xs:
-            m[x[0]] = x[1]
-    return m
 
-def __read_env(file: str, default_file: str) -> Dict[str, str]:
+def __read_env(file: str, default_file: str, section: str = '') -> Dict[str, Any]:
     file_name = os.extract_file_name(file);
     type = file_name.split(".")[0].upper()
     # load default
-    m = __read_env_file(default_file)
+    m: Dict[str, Any] = __read_env_file(default_file)
+    m: Dict[str, Any] = m[section] if section else m
 
     # override with one from file
     n = __read_env_file(file) if os.file_exists(file) else None
@@ -286,7 +278,7 @@ def __validate_config(config: ContainerConfig):
 def __get_container_config_for(x: str) -> ContainerConfig:
     if x not in [DEFAULT, TESTING, DEVELOPMENT, STAGING, PRODUCTION]:
         raise ValueError(f"Unknown container config type: {x}")
-    return ContainerConfig(__read_env("/data/container.env", f"/app/deploy/envars/{x}.container.env"))
+    return ContainerConfig(__read_env("/data/container.toml", f"/app/deploy/envars/container.toml", x))
 
 
 def load_config_object(name: str):
@@ -300,7 +292,7 @@ def load_config_object(name: str):
 
 def read_remote_host_config() -> RemoteHostConfig:
     return RemoteHostConfig(
-        __read_env(f"{__get_host_data_dir()}/remote-host.env", f"deploy/envars/remote-host.env")
+        __read_env(f"{__get_host_data_dir()}/remote.toml", f"deploy/envars/remote.toml")
     )
 
 
@@ -310,7 +302,7 @@ def read_host_config() -> HostConfig:
         git.current_branch(),
         git.head_sha(),
         "127.0.0.1",
-        __read_env(f"{__get_host_data_dir()}/host.env", f"deploy/envars/host.env")
+        __read_env(f"{__get_host_data_dir()}/host.toml", f"deploy/envars/host.toml")
     )
 
 
