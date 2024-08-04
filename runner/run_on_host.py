@@ -1,8 +1,8 @@
 from typing import List
 import sys
-sys.path.extend(["./", "./ambuda", "./unstd"])
+sys.path.extend(['./'])
 from host import code, podman
-from unstd import os
+import unstd.os as os
 import help
 
 

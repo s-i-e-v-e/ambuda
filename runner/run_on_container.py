@@ -10,7 +10,7 @@ cfg = config.read_container_config()
 
 
 def __start():
-    os.run(["redis-server", "--port", cfg.REDIS_PORT, "--daemonize", "yes"])
+    os.run(["redis-server", "--port", str(cfg.REDIS_PORT), "--daemonize", "yes"])
     os.run(["celery", "--app", "ambuda.tasks", "worker", "--detach", "--loglevel=INFO"])
 
     print("podman: FLASK START")

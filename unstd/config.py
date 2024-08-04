@@ -1,6 +1,6 @@
 import logging
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from unstd import git, os
 
 DEFAULT = "default"
@@ -28,21 +28,21 @@ def __get_host_data_dir() -> str:
     return host_data_dir
 
 
-def __read_env_file(path: str) -> Dict[str, str]:
+def __read_env_file(path: str) -> Dict[str, Any]:
     return os.read_toml(path) if os.file_exists(path) else dict()
 
 
-def __read_env(file: str, default_file: str, section: str = '') -> Dict[str, Any]:
+def __read_env(file: str, default: dict[str, Any], section: str = '') -> Dict[str, Any]:
     file_name = os.extract_file_name(file);
     type = file_name.split(".")[0].upper()
     # load default
-    m: Dict[str, Any] = __read_env_file(default_file)
-    m: Dict[str, Any] = m[section] if section else m
+    m = default
 
     # override with one from file
-    n = __read_env_file(file) if os.file_exists(file) else None
+    n = __read_env_file(file) if os.file_exists(file) else dict()
+    n = n[section] if section and section in n else n
     if not n:
-        logging.warning(f"{type} config: going with defaults. If you have defined a custom config,\nplease put it in {DIR_LOCAL}/{file_name} or {DIR_STD}/{file_name}")
+        logging.warning(f"{type} config: going with defaults (if available). If you have defined a custom config,\nplease put it in {DIR_LOCAL}/{file_name} or {DIR_STD}/{file_name}")
     else:
         for k in m.keys():
             v = n[k] if k in n.keys() else m[k]
@@ -278,7 +278,10 @@ def __validate_config(config: ContainerConfig):
 def __get_container_config_for(x: str) -> ContainerConfig:
     if x not in [DEFAULT, TESTING, DEVELOPMENT, STAGING, PRODUCTION]:
         raise ValueError(f"Unknown container config type: {x}")
-    return ContainerConfig(__read_env("/data/container.toml", f"/app/deploy/envars/container.toml", x))
+    return ContainerConfig(__read_env(
+        "/data/container.toml",
+        __read_env_file("/app/deploy/envars/container.toml")[x],
+        x))
 
 
 def load_config_object(name: str):
@@ -290,10 +293,22 @@ def load_config_object(name: str):
     return config
 
 
-def read_remote_host_config() -> RemoteHostConfig:
-    return RemoteHostConfig(
-        __read_env(f"{__get_host_data_dir()}/remote.toml", f"deploy/envars/remote.toml")
+def read_remote_host_config(section: str) -> RemoteHostConfig:
+    file = f"{__get_host_data_dir()}/remote.toml"
+    template = "deploy/envars/remote.toml.template"
+    if not os.file_exists(file):
+        logging.warning(f"{file} does not exist")
+        print("Please create a TOML using the follow variables.")
+        print("You can define multiple remote hosts each with a different [label]")
+        print('# ambuda remote host config')
+        print(os.read_file_as_string(template))
+        os.exit(-1)
+    e = __read_env(
+        file,
+        __read_env_file(template)['label'],
+        section
     )
+    return RemoteHostConfig(e)
 
 
 def read_host_config() -> HostConfig:
@@ -302,7 +317,10 @@ def read_host_config() -> HostConfig:
         git.current_branch(),
         git.head_sha(),
         "127.0.0.1",
-        __read_env(f"{__get_host_data_dir()}/host.toml", f"deploy/envars/host.toml")
+        __read_env(
+            f"{__get_host_data_dir()}/host.toml",
+            __read_env_file("deploy/envars/host.toml")
+        )
     )
 
 
