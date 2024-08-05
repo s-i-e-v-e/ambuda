@@ -7,6 +7,10 @@ from host import code, podman
 import help
 
 
+def __spawn(args: List[str]):
+    os.spawn(args)
+
+
 def __main(args: List[str]) -> None:
     def verify(args):
         xs = []
@@ -28,6 +32,7 @@ def __main(args: List[str]) -> None:
             "test": code.test,
             "lint": code.lint,
             "verify": verify,
+            "spawn": __spawn,
             "user": lambda args: podman.exec(['user']),
 
             "copy-to": podman.copy_to,

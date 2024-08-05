@@ -1,28 +1,18 @@
 from typing import List
+from runner import validate
 from unstd import config, os
-from container import install
 
 
 def __get_image_names(os_name: str, hc: config.HostConfig) -> tuple[str, str]:
     base = f"ambuda-{hc.GIT_BRANCH}-{os_name}"
     return f"{base}:{hc.AMBUDA_VERSION}-{hc.GIT_SHA}", f"{base}:latest"
 
-
-def __get_valid_os(args: List[str]):
-    os_name = "" if os.is_next_arg_an_opt(args) else os.next_arg(args, "")
-    os_name = os_name if os_name else "alpine"
-    if not install.is_valid_os(os_name):
-        print(f'Unsupported OS: {os_name}')
-        os.exit(1)
-    return os_name
-
-
 cfg = config.read_host_config()
 PODMAN_DIR = f"/{os.get_tmp_dir()}/podman"
 
 
 def build(args: List[str]):
-    os_name = __get_valid_os(args)
+    os_name = validate.get_valid_os(args)
     ambuda_image, ambuda_image_latest = __get_image_names(os_name, cfg)
     print(f"podman: BUILDING {os_name}")
 
@@ -50,7 +40,7 @@ def build(args: List[str]):
 
 
 def run(args: List[str]):
-    os_name = __get_valid_os(args)
+    os_name = validate.get_valid_os(args)
     ambuda_image, _ = __get_image_names(os_name, cfg)
     print(f"podman: RUNNING {os_name}")
 

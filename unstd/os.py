@@ -65,6 +65,10 @@ def run_with_string_output(xs: List[str], cwd: Any = None) -> str:
     return p.stdout.strip()
 
 
+def spawn(xs: List[str], cwd: Any = None):
+    pid = subprocess.Popen(xs, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=cwd,  close_fds=True)
+
+
 def rm(f: str):
     os.remove(f)
 
