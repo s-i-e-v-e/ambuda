@@ -1,12 +1,13 @@
-import re
-from typing import List
 import sys
-sys.path.extend(["./", "./ambuda", "./unstd"])
+sys.path.extend(['./'])
+
+from typing import List
 from unstd import config, os
 import help
 
 REMOTE_CODE_DIR = "/tmp/ambuda"
 GIT_URL = "https://github.com/s-i-e-v-e/ambuda"
+
 
 def __exec(remote: str, args: List[str]):
     cfg = config.read_remote_host_config(remote)
@@ -23,48 +24,48 @@ def __exec(remote: str, args: List[str]):
     os.run(xs)
 
 
-def __setup(remote: str):
-    cmd = f"""
-        rm -rf {REMOTE_CODE_DIR}
-            mkdir -p {REMOTE_CODE_DIR} \
-            && cd {REMOTE_CODE_DIR} \
-            && git clone {GIT_URL} {REMOTE_CODE_DIR} \
-            && cd {REMOTE_CODE_DIR} \
-            && git switch podman
-            """
-    __exec(remote, [cmd])
+def __build(remote: str, args: List[str]):
+    def clone(remote: str):
+        cmd = f"""
+            rm -rf {REMOTE_CODE_DIR}
+                mkdir -p {REMOTE_CODE_DIR} \
+                && cd {REMOTE_CODE_DIR} \
+                && git clone {GIT_URL} {REMOTE_CODE_DIR} \
+                && cd {REMOTE_CODE_DIR} \
+                && git switch podman
+                """
+        __exec(remote, [cmd])
 
+    clone(remote)
 
-def __build(remote: str):
-    cmd = f"""
-            cd {REMOTE_CODE_DIR} \
-            && git switch podman \
-            && ./ar build
-            """
-    __exec(remote, [cmd])
-
-
-def __stage(remote: str):
     cmd = f"""
             cd {REMOTE_CODE_DIR} \
             && git switch podman \
-            && ./ar stage
+            && ./ar build {' '.join(args)} \
             """
     __exec(remote, [cmd])
 
 
-def __run(args: List[str]):
+def __run(remote: str, args: List[str]):
+    cmd = f"""
+            cd {REMOTE_CODE_DIR} \
+            && git switch podman \
+            && ./ar run {' '.join(args)} \
+            """
+    __exec(remote, [cmd])
+
+
+def __main(args: List[str]):
     print(f'RUNNING REMOTELY {' '.join(args[1:])}')
     del args[0]
-    [cmd, remote] = os.next_arg(args, "help").split(':')
+    [remote, cmd] = os.next_arg_pair(args)
     f = os.switch(cmd, help.none,
                   {
-                      "build": lambda args: __build(remote),
-                      "stage": lambda args: __stage(remote),
-                      "setup": lambda args: __setup(remote),
+                      "build": lambda args: __build(remote, args),
+                      "run": lambda args: __run(remote, args),
                       "exec": lambda args: __exec(remote, args),
                   })
     f(args)
 
 
-__run(sys.argv)
+__main(sys.argv)

@@ -49,10 +49,10 @@ def build(args: List[str]):
     )
 
 
-def stage(args: List[str]):
+def run(args: List[str]):
     os_name = __get_valid_os(args)
     ambuda_image, _ = __get_image_names(os_name, cfg)
-    print(f"podman: STAGING {os_name}")
+    print(f"podman: RUNNING {os_name}")
 
     pod_file = f"/{PODMAN_DIR}/podman.yml"
     os.copy_file("deploy/containers/podman.yml", pod_file)

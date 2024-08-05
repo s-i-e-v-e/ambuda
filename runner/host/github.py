@@ -78,7 +78,7 @@ def __get_release_pr_open_workflow():
         "on": {"workflow_dispatch": {}, "pull_request": __pull_request(["release"])},
         "jobs": {
             "build": __remote_job("build"),
-            "stage": __remote_job("stage", needs="build"),
+            "run": __remote_job("run", needs="build"),
             "pr_commented": __job_pr_comment("build"),
         },
     }

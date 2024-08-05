@@ -1,6 +1,7 @@
-from typing import List
 import sys
-sys.path.extend(["./", "./ambuda", "./unstd"])
+sys.path.extend(["./"])
+
+from typing import List
 from unstd import config, os
 os.fix_venv()
 from container import vidyut_initialize, db_initialize, verify

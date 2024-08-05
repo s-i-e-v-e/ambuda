@@ -1,8 +1,9 @@
-from typing import List
 import sys
 sys.path.extend(['./'])
+
+from typing import List
+from unstd import os
 from host import code, podman
-import unstd.os as os
 import help
 
 
@@ -18,7 +19,7 @@ def __main(args: List[str]) -> None:
     f = os.switch(cmd, help.none,
         {
             "build": podman.build,  # build image
-            "stage": podman.stage,  # stage container
+            "run": podman.run,  # run container
             "inspect": podman.inspect,
             "destroy": podman.destroy,
             "kill": podman.kill,

@@ -1,43 +1,42 @@
 from typing import List
-
-import unstd.os
+from unstd import os
 
 
 def __js_test():
-    unstd.os.run(["npx", "jest"])
+    os.run(["npx", "jest"])
 
 
 def __js_test_coverage():
-    unstd.os.run(["npx", "jest", "--coverage"])
+    os.run(["npx", "jest", "--coverage"])
 
 
 def __py_test():
-    unstd.os.run(["pytest", "."])
+    os.run(["pytest", "."])
 
 
 def __py_test_coverage():
-    unstd.os.run(["pytest", "--cov=ambuda", "--cov-report=html", "test/"])
-    unstd.os.run(["coverage", "report", "--fail-under=80"])
+    os.run(["pytest", "--cov=ambuda", "--cov-report=html", "test/"])
+    os.run(["coverage", "report", "--fail-under=80"])
 
 
 def __js_check():
-    unstd.os.run(["npx", "tsc", "/app/static/js/*.ts" "-noEmit"])
+    os.run(["npx", "tsc", "/app/static/js/*.ts" "-noEmit"])
 
 
 def __js_lint():
-    unstd.os.run(
+    os.run(
         ["npx", "eslint", "--fix", "/app/static/js/*", "--ext" ".js,.ts"]
     )
 
 
 def __py_lint_check():
-    unstd.os.run(["black", ".", "--diff"])
+    os.run(["black", ".", "--diff"])
 
 
 def __py_lint():
     __py_lint_check()
-    unstd.os.run(["ruff", ".", "-fix"])
-    unstd.os.run(["black", "."])
+    os.run(["ruff", ".", "-fix"])
+    os.run(["black", "."])
 
 
 def check(args: List[str]) -> None:
@@ -52,7 +51,7 @@ def __test_with_coverage():
 
 
 def test(args: List[str]) -> None:
-    cv = unstd.os.next_arg(args, '')
+    cv = os.next_arg(args, '')
     if cv == "--coverage":
         __test_with_coverage()
     else:
