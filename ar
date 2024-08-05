@@ -1,21 +1,22 @@
 #!/bin/bash
+cd $(dirname "$0")
 if [ "$1" == "install" ]; then
   shift
-  python `pwd`/runner/container/install.py $*
+  python ./runner/container/install.py $*
 elif [ "$1" == "i18n" ]; then
-  python `pwd`/runner/container/i18n.py
+  python ./runner/container/i18n.py
 elif [ "$1" == "gh" ]; then
-  python `pwd`/runner/host/github.py
+  python ./runner/host/github.py
 elif [ "$1" == "container" ]; then
   export PYTHONFAULTHANDLER=1
   export PYTHONUNBUFFERED=1
   shift
-  python `pwd`/runner/run_on_container.py $*
+  python ./runner/run_on_container.py $*
 elif [ "$1" == "remote" ]; then
   export PYTHONFAULTHANDLER=1
   export PYTHONUNBUFFERED=1
   shift
-  python `pwd`/runner/run_on_remote_host.py $*
+  python ./runner/run_on_remote_host.py $*
 else
-  python `pwd`/runner/run_on_host.py $*
+  python ./runner/run_on_host.py $*
 fi

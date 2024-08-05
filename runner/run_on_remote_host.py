@@ -1,3 +1,4 @@
+import re
 import sys
 sys.path.extend(['./'])
 
@@ -24,6 +25,15 @@ def __exec(remote: str, args: List[str]):
     print(" ".join(xs))
     os.run(xs)
 
+
+def __switch_and_exec(remote: str, cmd_text: str):
+    cmd = f"""
+            cd {REMOTE_CODE_DIR} \
+            && {cmd_text}
+            """
+    __exec(remote, [cmd])
+
+
 def __prepare(remote: str, args: List[str]):
     os_name = validate.get_valid_os(args)
     if os_name == 'arch':
@@ -34,48 +44,73 @@ def __prepare(remote: str, args: List[str]):
         raise Exception("Unsupported OS")
 
 
-def __build(remote: str, args: List[str]):
-    def clone(remote: str):
-        cmd = f"""
-            rm -rf {REMOTE_CODE_DIR}
-                mkdir -p {REMOTE_CODE_DIR} \
-                && cd {REMOTE_CODE_DIR} \
-                && git clone {GIT_URL} {REMOTE_CODE_DIR} \
-                && cd {REMOTE_CODE_DIR} \
-                && git switch podman
-                """
-        __exec(remote, [cmd])
+def __clone_repo(remote: str, args=None):
+    cmd = f"""
+        rm -rf {REMOTE_CODE_DIR} \
+        && mkdir -p {REMOTE_CODE_DIR} \
+        && cd {REMOTE_CODE_DIR} \
+        && git clone {GIT_URL} {REMOTE_CODE_DIR} \
+        && cd {REMOTE_CODE_DIR} \
+        && git switch podman
+    """
+    __exec(remote, [cmd])
 
-    clone(remote)
+
+def __build(remote: str, args: List[str]):
+    __clone_repo(remote)
 
     cmd = f"""
-            cd {REMOTE_CODE_DIR} \
-            && git switch podman \
-            && ./ar build {' '.join(args)} \
-            """
-    __exec(remote, [cmd])
+        ./ar build {' '.join(args)}
+    """
+    __switch_and_exec(remote, cmd)
 
 
 def __run(remote: str, args: List[str]):
+    __exec(remote, ["pkill caddy"])
     cmd = f"""
-            cd {REMOTE_CODE_DIR} \
-            && git switch podman \
-            && ./ar spawn sudo caddy reverse-proxy --from :80 --to :5000 \
-            && ./ar run {' '.join(args)}
-            """
-    __exec(remote, [cmd])
+        ./ar spawn sudo caddy reverse-proxy --from :80 --to :5000 \
+        && ./ar run {' '.join(args)}
+    """
+    __switch_and_exec(remote, cmd)
+
+
+def __inspect(remote: str, args: List[str]):
+    cmd = f"""
+        ./ar inspect {' '.join(args)}
+    """
+    __switch_and_exec(remote, cmd)
+
+
+def __destroy(remote: str, args: List[str]):
+    cmd = f"""
+        ./ar destroy {' '.join(args)}
+    """
+    __switch_and_exec(remote, cmd)
+
+
+def __kill(remote: str, args: List[str]):
+    cmd = f"""
+        ./ar kill {' '.join(args)}
+    """
+    __switch_and_exec(remote, cmd)
 
 
 def __main(args: List[str]):
     print(f'RUNNING REMOTELY {' '.join(args[1:])}')
     del args[0]
-    [remote, cmd] = os.next_arg_pair(args)
+    remote, cmd = os.next_arg_pair(args)
     f = os.switch(cmd, help.none,
                   {
+                      "clone": lambda args: __clone_repo(remote, args),
+                      "exec": lambda args: __exec(remote, args),
+
                       "prepare": lambda args: __prepare(remote, args),
                       "build": lambda args: __build(remote, args),
                       "run": lambda args: __run(remote, args),
-                      "exec": lambda args: __exec(remote, args),
+
+                      "inspect": lambda args: __inspect(remote, args),
+                      "kill": lambda args: __kill(remote, args),
+                      "destroy": lambda args: __destroy(remote, args),
                   })
     f(args)
 

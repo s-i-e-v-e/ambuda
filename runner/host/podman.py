@@ -1,3 +1,4 @@
+import json
 from typing import List
 from runner import validate
 from unstd import config, os
@@ -71,26 +72,50 @@ def run(args: List[str]):
 
 
 def inspect(args: List[str]):
-    os.run(
+    x = os.run_with_string_output(
         [
             "podman",
             "inspect",
             cfg.CONTAINER_NAME,
-            "-f",
-            "{{ .NetworkSettings.IPAddress }} {{ .NetworkSettings.Ports }}",
         ]
     )
+    ci = json.loads(x)[0]
+    ci_oci = f"{ci['OCIRuntime']} [oci_version: {ci['State']['OciVersion']}]"
+    ci_ports = []
+    ci_ns_ports = ci['NetworkSettings']['Ports']
+    for k in ci_ns_ports:
+        protocol = k.split('/')[1]
+        for x in ci_ns_ports[k]:
+            ci_ports.append(f"{x['HostIp']}:{x['HostPort']}/{protocol}")
+
+    print('Container Information')
+    print('---------------------')
+    print(f"Name: {ci['Name']}")
+    print(f"ID: {ci['Id']}")
+    print(f"Created: {ci['Created']}")
+    print(f"Started: {ci['State']['StartedAt']}")
+    print(f"OCI: {ci_oci}")
+    print(f"FS Driver: {ci['Driver']}")
+    print(f"Host Name: {ci['Config']['Hostname']}")
+    print(f"Domain Name: {ci['Config']['Domainname']}")
+    print(f"IP Addr: {ci['NetworkSettings']['IPAddress']}")
+    print("Ports:")
+    for p in ci_ports:
+        print(f"  {p}")
 
 
 def kill(args: List[str]):
+    print(f"Shutting down container: {cfg.CONTAINER_NAME}")
     os.run(["podman", "kill", cfg.CONTAINER_NAME])
 
 
 def destroy(args: List[str]):
-    os.run(["podman", "image", "rm", "-a", "-f"])
-    # kill(args)
-    # unstd.os.run(['podman', 'pod', 'rm', '-a', '-f'])
-    # unstd.os.run(['podman', 'container', 'rm', '-a', '-f'])
+    y = input(f"\nThis operation CANNOT be reversed. Are you sure that you wish to\nDELETE ALL containers, ALL pods and ALL images from this system.\nIf yes, please type 'DESTROY' to continue: ")
+    if y == "DESTROY":
+        os.run(["podman", "image", "rm", "-a", "-f"])
+        print('All containers, pods and images have been deleted from this system')
+    else:
+        print('No harm done')
 
 
 def copy_to(args: List[str]):
