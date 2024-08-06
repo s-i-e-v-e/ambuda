@@ -13,12 +13,12 @@ STAGING = "staging"
 #: The production environment. For production serving.
 PRODUCTION = "production"
 
-DIR_LOCAL = f"{os.home()}/.local/share/ambuda"
 DIR_STD = "/data/ambuda"
+LOCAL = ".local/share/ambuda"
 def __get_host_data_dir() -> str:
     host_data_dir = DIR_STD
     if not os.dir_exists(host_data_dir):
-        host_data_dir = DIR_LOCAL
+        host_data_dir = f"{os.home()}/{LOCAL}"
         if not os.dir_exists(host_data_dir):
             os.make_dir(host_data_dir)
         else:
@@ -42,7 +42,7 @@ def __read_env(file: str, default: dict[str, Any], section: str = '') -> Dict[st
     n = __read_env_file(file) if os.file_exists(file) else dict()
     n = n[section] if section and section in n else n
     if not n:
-        logging.warning(f"{type} config: going with defaults (if available). If you have defined a custom config,\nplease put it in {DIR_LOCAL}/{file_name} or {DIR_STD}/{file_name}")
+        logging.warning(f"{type} config: going with defaults (if available). If you have defined a custom config,\nplease put it in ~/{LOCAL}/{file_name} or {DIR_STD}/{file_name} on the HOST")
     else:
         for k in m.keys():
             v = n[k] if k in n.keys() else m[k]

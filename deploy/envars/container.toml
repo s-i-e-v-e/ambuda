@@ -1,6 +1,6 @@
 [default]
 # General
-AMBUDA_ENVIRONMENT = "staging"
+AMBUDA_ENVIRONMENT = "production"
 BABEL_DEFAULT_LOCALE = "en"
 
 # Data and File storage
