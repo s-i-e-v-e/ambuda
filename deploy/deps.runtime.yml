@@ -131,6 +131,11 @@ tools:
     - arch: python-babel
     - ubuntu: python3-babel
 build:
+  - pytest:
+      - py: $
+      - alpine: py3-$
+      - arch: python-$
+      - ubuntu: python3-$
   - toml:
       - py: $
       - alpine: py3-$
@@ -141,3 +146,6 @@ build:
       - alpine: py3-$
       - arch: python-$
       - ubuntu: python3-$
+npm:
+  build:
+    - jest: ''

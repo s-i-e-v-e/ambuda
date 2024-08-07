@@ -4,7 +4,7 @@ RUN mkdir /data
 RUN mkdir /data/database
 RUN mkdir /app
 WORKDIR /app
-RUN npm install -D tailwindcss esbuild @tailwindcss/typography concurrently
+RUN npm install -D tailwindcss esbuild @tailwindcss/typography concurrently jest
 
 FROM node as npx
 COPY ./static /app/static

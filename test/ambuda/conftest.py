@@ -1,3 +1,6 @@
+import sys
+sys.path.extend(["./"])
+
 import pytest
 from flask_login import FlaskLoginClient
 from sqlalchemy.engine import Engine
