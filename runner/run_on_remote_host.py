@@ -1,17 +1,16 @@
-import re
 import sys
 sys.path.extend(['./'])
 
-from typing import List
+from typing import List, Optional
 from unstd import config, os
-import help
-import validate
+from runner import help
+from runner.host import prepare
 
 REMOTE_CODE_DIR = "/tmp/ambuda"
 GIT_URL = "https://github.com/s-i-e-v-e/ambuda"
 
 
-def __exec(remote: str, args: List[str]):
+def __exec(remote: str, args: List[str], return_output=False) -> Optional[str]:
     cfg = config.read_remote_host_config(remote)
     xs = []
     xs.extend([
@@ -23,7 +22,10 @@ def __exec(remote: str, args: List[str]):
     ])
     xs.extend(args)
     print(" ".join(xs))
-    os.run(xs)
+    if return_output:
+        return os.run_with_string_output(xs)
+    else:
+        os.run(xs)
 
 
 def __switch_and_exec(remote: str, cmd_text: str):
@@ -32,16 +34,6 @@ def __switch_and_exec(remote: str, cmd_text: str):
             && {cmd_text}
             """
     __exec(remote, [cmd])
-
-
-def __prepare(remote: str, args: List[str]):
-    os_name = validate.get_valid_os(args)
-    if os_name == 'arch':
-        __exec(remote, ["sudo", "pacman", "-Syu", "git", "podman", "crun", "python", "python-yaml", "python-toml", "caddy"])
-        if os.is_next_arg_an_opt(args) and os.next_arg(args, '') == '--reboot':
-            __exec(remote, ["sudo", "reboot"])
-    else:
-        raise Exception("Unsupported OS")
 
 
 def __clone_repo(remote: str, args=None):
@@ -54,6 +46,13 @@ def __clone_repo(remote: str, args=None):
         && git switch podman
     """
     __exec(remote, [cmd])
+
+
+def __prepare(remote: str, args: List[str]):
+    def exec(args: List[str], return_output = False):
+        return __exec(remote, args, return_output)
+
+    prepare.run(args, exec)
 
 
 def __build(remote: str, args: List[str]):

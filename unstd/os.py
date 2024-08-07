@@ -133,15 +133,10 @@ def get_tmp_dir() -> str:
     return f"/tmp/{random_string()}"
 
 
+OS_DETECTION = "cat /etc/*elease | grep '^ID=' | cut -c 4-"
+
 def running_on() -> str:
-    lines = ''
-    for d in os.listdir('/etc'):
-        if d.endswith('release'):
-            lines += read_file_as_string(f"/etc/{d}")
-
-    xs = lines.split('\n')
-
-    return ''.join(filter(lambda x: x.startswith('ID='), xs)).split('=')[1]
+    return run_with_string_output(["bash", "-c", OS_DETECTION])
 
 
 Command = Callable[[List[str]], None]

@@ -76,5 +76,6 @@ def __main(args: List[str]) -> None:
     cmd = unstd.os.next_arg(sys.argv, '')
     __install_on_os(cmd)
 
+
 if __name__ == '__main__':
     __main(sys.argv)

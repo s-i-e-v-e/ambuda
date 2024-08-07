@@ -5,6 +5,7 @@ from typing import List
 from unstd import os
 from host import code, podman, user
 import help
+from runner.host import prepare
 
 
 def __spawn(args: List[str]):
@@ -22,6 +23,8 @@ def __main(args: List[str]) -> None:
     cmd = os.next_arg(args, "help")
     f = os.switch(cmd, help.none,
         {
+            "prepare": prepare.run,
+
             "build": podman.build,  # build image
             "run": podman.run,  # run container
             "inspect": podman.inspect,
