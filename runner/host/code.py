@@ -20,12 +20,12 @@ def __py_test_coverage():
 
 
 def __js_check():
-    os.run(["npx", "tsc", "/app/static/js/*.ts" "-noEmit"])
+    os.run(["npx", "tsc", "static/js/*.ts" "-noEmit"])
 
 
 def __js_lint():
     os.run(
-        ["npx", "eslint", "--fix", "/app/static/js/*", "--ext" ".js,.ts"]
+        ["npx", "eslint", "--fix", "static/js/*", "--ext", ".js,.ts"]
     )
 
 
