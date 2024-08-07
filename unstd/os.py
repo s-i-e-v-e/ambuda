@@ -125,8 +125,8 @@ def get_external_ip() -> str:
     return x.split(" ")[6]
 
 
-def fix_venv():
-    os.environ['PYTHONPATH'] = f"/venv/lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages"
+def fix_venv(base: str):
+    os.environ['PYTHONPATH'] = f"{base}/lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages"
 
 
 def get_tmp_dir() -> str:

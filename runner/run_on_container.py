@@ -3,9 +3,9 @@ sys.path.extend(["./"])
 
 from typing import List
 from unstd import config, os
-os.fix_venv()
-from container import vidyut_initialize, db_initialize, verify, cli
-import help
+os.fix_venv('/venv')
+from container import vidyut_initialize, db_initialize, verify, code_test, cli
+from runner import help
 
 cfg = config.read_container_config()
 
@@ -58,6 +58,7 @@ def __main(args: List[str]) -> None:
         {
             "init": __init,
             "verify": verify.verify,
+            "test": code_test.test,
             "user": cli.user,
             "help": help.run,
         })

@@ -19,6 +19,12 @@ def __main(args: List[str]) -> None:
         xs.extend(args)
         podman.exec(xs)
 
+    def test(args):
+        xs = []
+        xs.append('test')
+        xs.extend(args)
+        podman.exec(xs)
+
     del args[0]
     cmd = os.next_arg(args, "help")
     f = os.switch(cmd, help.none,
@@ -32,7 +38,7 @@ def __main(args: List[str]) -> None:
             "kill": podman.kill,
 
             "check": code.check,
-            "test": code.test,
+            "test": test,
             "lint": code.lint,
             "verify": verify,
             "spawn": __spawn,
