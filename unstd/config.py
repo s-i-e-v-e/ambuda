@@ -102,6 +102,7 @@ class ContainerConfig:
     #:
     #: https://docs.sqlalchemy.org/en/14/core/engines.html#database-urls
     SQLALCHEMY_DATABASE_URI: str
+    DATABASE_FILE: str
 
     AMBUDA_CONTAINER_IP: str
     #: Where to store user uploads (PDFs, images, etc.).
@@ -221,6 +222,7 @@ class ContainerConfig:
             self.RAW_DATA_DIR = dt["RAW_DATA_DIR"]
             self.is_production = self.AMBUDA_ENVIRONMENT == PRODUCTION
             self.is_testing = self.AMBUDA_ENVIRONMENT == TESTING
+            self.DATABASE_FILE = self.SQLALCHEMY_DATABASE_URI.replace('sqlite:///', '')
 
 
 def __validate_config(config: ContainerConfig):

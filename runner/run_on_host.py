@@ -3,7 +3,7 @@ sys.path.extend(['./'])
 
 from typing import List
 from unstd import os
-from host import code, podman
+from host import code, podman, user
 import help
 
 
@@ -33,7 +33,7 @@ def __main(args: List[str]) -> None:
             "lint": code.lint,
             "verify": verify,
             "spawn": __spawn,
-            "user": lambda args: podman.exec(['user']),
+            "user": user.run,
 
             "copy-to": podman.copy_to,
             "help": help.run,
