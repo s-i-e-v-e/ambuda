@@ -2,7 +2,16 @@ from typing import List
 
 from unstd import os
 from runner.container import repo
-#    ./cli.py create-project <project-title> <path-to-project-pdf>
+
+DEFAULT_USER = "ambuda"
+DEFAULT_USER_PASS = f"{DEFAULT_USER}00"
+DEFAULT_USER_EMAIL = f"{DEFAULT_USER}@ambuda.org"
+
+def user_add_default() -> None:
+    if not repo.user_exists(DEFAULT_USER, DEFAULT_USER_EMAIL):
+        repo.user_add(DEFAULT_USER, DEFAULT_USER_PASS, DEFAULT_USER_EMAIL)
+        repo.role_add(DEFAULT_USER, "admin")
+        repo.role_add(DEFAULT_USER, "p2")
 
 
 def __user_add(args: List[str]) -> None:

@@ -1,5 +1,5 @@
 """Views for basic site pages."""
-
+import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -16,8 +16,12 @@ from ambuda import consts
 from ambuda import database as db
 from ambuda import queries as q
 from ambuda.enums import SitePageStatus
-from ambuda.tasks import projects as project_tasks
 from ambuda.views.proofing.decorators import moderator_required, p2_required
+from ambuda.std import executor, kvs
+import ambuda.ocr.do_image_extraction
+import ambuda.repo.project
+
+from unstd import os
 
 bp = Blueprint("proofing", __name__)
 
@@ -188,28 +192,36 @@ def create_project():
         project_dir = Path(unstd.config.current.FLASK_UPLOAD_DIR) / "projects" / slug
         pdf_dir = project_dir / "pdf"
         page_image_dir = project_dir / "pages"
-        pdf_dir.mkdir(parents=True, exist_ok=True)
-        page_image_dir.mkdir(parents=True, exist_ok=True)
+        os.make_dir(pdf_dir.__str__())
+        os.make_dir(page_image_dir.__str__())
 
         # Save the original PDF so that it can be downloaded later or reused
         # for future tasks (thumbnails, better image formats, etc.)
         pdf_path = pdf_dir / "source.pdf"
         form.local_file.data.save(pdf_path)
 
-        task = project_tasks.create_project.delay(
+        # get page count
+        num_pages = ambuda.ocr.do_image_extraction.get_page_count(pdf_path.__str__())
+
+        # add project to database
+        logging.info(f'Received upload task "{title}" for path {pdf_path}.')
+        ambuda.repo.project.add(
             display_title=title,
-            pdf_path=str(pdf_path),
-            output_dir=str(page_image_dir),
-            app_environment=unstd.config.current.AMBUDA_ENVIRONMENT,
             creator_id=current_user.id,
+            num_pages=num_pages
         )
+
+        # start splitting pdf into images
+        task_id = ambuda.ocr.do_image_extraction.split_pdf_into_pages(pdf_path, page_image_dir)
+        kvs.set(f"{task_id}.slug", slug)
+        ts = executor.ts_get(task_id)
         return render_template(
             "proofing/create-project-post.html",
-            stauts=task.status,
+            status=ts.status,
             current=0,
             total=0,
             percent=0,
-            task_id=task.id,
+            task_id=ts.id,
         )
 
     return render_template("proofing/create-project.html", form=form)
@@ -218,24 +230,15 @@ def create_project():
 @bp.route("/status/<task_id>")
 def create_project_status(task_id):
     """AJAX summary of the task."""
-    r = project_tasks.create_project.AsyncResult(task_id)
-
-    info = r.info or {}
-    if isinstance(info, Exception):
-        current = total = percent = 0
-        slug = None
-    else:
-        current = info.get("current", 100)
-        total = info.get("total", 100)
-        slug = info.get("slug", None)
-        percent = 100 * current / total
-
+    ts = executor.ts_get(task_id)
+    slug = kvs.get(f"{task_id}.slug")
+    executor.status()
     return render_template(
         "include/task-progress.html",
-        status=r.status,
-        current=current,
-        total=total,
-        percent=percent,
+        status=ts.status,
+        current=ts.current,
+        total=ts.total,
+        percent=ts.percentage,
         slug=slug,
     )
 

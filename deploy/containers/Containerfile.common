@@ -9,8 +9,10 @@ RUN npm install -D tailwindcss esbuild @tailwindcss/typography concurrently jest
 FROM node as npx
 COPY ./static /app/static
 COPY ./tailwind.config.js /app/
-RUN npx tailwindcss -i /app/static/css/style.css -o /app/static/gen/style.css --minify \
-    && npx esbuild /app/static/js/main.js --outfile=/app/static/gen/main.js --bundle --minify
+#RUN npx tailwindcss -i /app/static/css/style.css -o /app/static/gen/style.css --minify \
+#    && npx esbuild /app/static/js/main.js --outfile=/app/static/gen/main.js --bundle --minify
+RUN npx tailwindcss -i /app/static/css/style.css -o /app/static/gen/style.css \
+    && npx esbuild /app/static/js/main.js --outfile=/app/static/gen/main.js --bundle
 
 FROM npx as python
 ENV PYTHONFAULTHANDLER=1 \

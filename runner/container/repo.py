@@ -25,9 +25,9 @@ class DatabaseConnection:
         return self.con.execute(sql, *args, **kwargs)
 
 
-def user_exists(name: str, email: str):
+def user_exists(name: str, email: str) -> bool:
     with DatabaseConnection() as db:
-        db.exec("SELECT * FROM users WHERE username = ? OR email = ?", (name, email))
+        return db.exec("SELECT * FROM users WHERE username = ? OR email = ?", (name, email)).fetchone() is not None
 
 
 def user_get(name: str) -> Optional[int]:

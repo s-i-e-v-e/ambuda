@@ -11,31 +11,12 @@ cfg = config.current
 
 
 def __start():
-    os.run(["redis-server", "--port", str(cfg.REDIS_PORT), "--daemonize", "yes"])
-    os.run(["celery", "--app", "ambuda.tasks", "worker", "--detach", "--loglevel=INFO"])
-
     print("podman: FLASK START")
-    print(f"{cfg.FLASK_ENV} Flask start @ {cfg.AMBUDA_CONTAINER_IP}:5000")
+    if not cfg.is_production:
+        cli.user_add_default()
 
-    if cfg.FLASK_ENV == "development":
-        # Start flask server in development mode
-        # Dynamically load css and js changes. Docker compose attaches to the ./static directory on localhost.
-        os.run(
-            [
-                "npx",
-                "concurrently",
-                f"flask run -h {cfg.AMBUDA_CONTAINER_IP} -p 5000",
-                "npx tailwindcss -i /app/static/css/style.css -o /app/static/gen/style.css --watch",
-                "npx esbuild /app/static/js/main.js --outfile=/app/static/gen/main.js --bundle --watch",
-            ]
-        )
-    else:
-        # Build, Staging, and Production modes take this route. Load site static files that are within the container.
-        os.run(
-            [
-                "flask", "run", "-h", cfg.AMBUDA_CONTAINER_IP, "-p", "5000",
-            ]
-        )
+    print(f"{cfg.FLASK_ENV} Flask start @ {cfg.AMBUDA_CONTAINER_IP}:5000")
+    os.run(["flask", "run", "-h", cfg.AMBUDA_CONTAINER_IP, "-p", "5000"])
 
 
 def __init(args: List[str]) -> None:

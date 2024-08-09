@@ -1,5 +1,8 @@
 """Manages an internal admin view for site data."""
-from flask import abort
+import sys
+#FIXME(sieve): figure out a portable way of doing this.
+sys.path.append('/app/venv/lib/python3.12/site-packages')
+print(sys.path)
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib import sqla
 from flask_login import current_user

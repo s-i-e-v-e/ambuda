@@ -209,7 +209,8 @@ def page_image(project_slug, page_slug):
 
     In production, we serve images directly from nginx.
     """
-    assert current_app.debug
+    import unstd.config
+    assert unstd.config.current.DEBUG
     image_path = get_page_image_filepath(project_slug, page_slug)
     return send_file(image_path)
 

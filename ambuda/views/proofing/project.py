@@ -1,7 +1,6 @@
 import logging
 import re
 
-from celery.result import GroupResult
 from flask import (
     Blueprint,
     current_app,
@@ -33,8 +32,7 @@ from wtforms_sqlalchemy.fields import QuerySelectField
 
 from ambuda import database as db
 from ambuda import queries as q
-from ambuda.tasks import app as celery_app
-from ambuda.tasks import ocr as ocr_tasks
+from ambuda.ocr import do_ocr
 from ambuda.utils import project_utils, proofing_utils
 from ambuda.utils.revisions import add_revision
 from ambuda.views.proofing.decorators import moderator_required, p2_required
@@ -664,7 +662,7 @@ def batch_ocr(slug):
         abort(404)
 
     if request.method == "POST":
-        task = ocr_tasks.run_ocr_for_project(
+        task = do_ocr.run_ocr_for_project(
             app_env=unstd.config.current.AMBUDA_ENVIRONMENT,
             project=project_,
         )
@@ -689,6 +687,7 @@ def batch_ocr(slug):
 
 @bp.route("/batch-ocr-status/<task_id>")
 def batch_ocr_status(task_id):
+    from celery.result import GroupResult
     r = GroupResult.restore(task_id, app=celery_app)
     assert r, task_id
 

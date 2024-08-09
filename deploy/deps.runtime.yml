@@ -1,9 +1,4 @@
 packages:
-  - celery:
-    - py: $
-    - alpine: $
-    - arch: python-celery
-    - ubuntu: '' #$ version conflict
   - click:
     - py: $
     - alpine: py3-$
@@ -75,6 +70,16 @@ packages:
     - arch: python-$-py
     - ubuntu: python3-$
   - markupsafe:
+    - py: $
+    - alpine: py3-$
+    - arch: python-$
+    - ubuntu: python3-$
+  - pillow:
+    - py: $
+    - alpine: py3-$
+    - arch: python-$
+    - ubuntu: ''
+  - pypdf:
     - py: $
     - alpine: py3-$
     - arch: python-$

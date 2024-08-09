@@ -14,6 +14,7 @@ STAGING = "staging"
 PRODUCTION = "production"
 
 DIR_STD = "/data/ambuda"
+CONTAINER_FILE_STD = f"{DIR_STD}/container.toml"
 LOCAL = ".local/share/ambuda"
 def __get_host_data_dir() -> str:
     host_data_dir = DIR_STD
@@ -32,17 +33,13 @@ def __read_env_file(path: str) -> Dict[str, Any]:
     return os.read_toml(path) if os.file_exists(path) else dict()
 
 
-def __read_env(file: str, default: dict[str, Any], section: str = '') -> Dict[str, Any]:
-    file_name = os.extract_file_name(file);
-    type = file_name.split(".")[0].upper()
+def __read_env(type: str, default: dict[str, Any], n: dict[str, Any]) -> Dict[str, Any]:
     # load default
     m = default
 
     # override with one from file
-    n = __read_env_file(file) if os.file_exists(file) else dict()
-    n = n[section] if section and section in n else n
     if not n:
-        logging.warning(f"{type} config: going with defaults (if available). If you have defined a custom config,\nplease put it in ~/{LOCAL}/{file_name} or {DIR_STD}/{file_name} on the HOST")
+        logging.warning(f"{type} config: going with defaults (if available). If you have defined a custom config,\nplease put it in {DIR_STD}/{type}.toml or ~/{LOCAL}/{type}.toml on the HOST")
     else:
         for k in m.keys():
             v = n[k] if k in n.keys() else m[k]
@@ -157,8 +154,6 @@ class ContainerConfig:
     #: We use Sentry to get notifications about server errors.
     SENTRY_DSN: str
 
-    REDIS_PORT: str
-    REDIS_HOST: str
     # Test-only
     # ---------
 
@@ -187,7 +182,7 @@ class ContainerConfig:
     is_production: bool
     is_testing: bool
 
-    def __init__(self, dt: Optional[Dict[str, str]]) -> None:
+    def __init__(self, dt: Optional[Dict[str, Any]]) -> None:
         if dt:
             self.AMBUDA_ENVIRONMENT = dt["AMBUDA_ENVIRONMENT"]
             self.FLASK_ENV = (
@@ -204,7 +199,7 @@ class ContainerConfig:
             self.TEMPLATES_AUTO_RELOAD = dt["TEMPLATES_AUTO_RELOAD"]
             self.MAIL_SERVER = dt["MAIL_SERVER"]
             self.MAIL_PORT = dt["MAIL_PORT"]
-            self.MAIL_USE_TLS = dt["MAIL_USE_TLS"] == "True"
+            self.MAIL_USE_TLS = dt["MAIL_USE_TLS"] is True
             self.MAIL_USERNAME = dt["MAIL_USERNAME"]
             self.MAIL_PASSWORD = dt["MAIL_PASSWORD"]
             self.MAIL_DEFAULT_SENDER = dt["MAIL_DEFAULT_SENDER"]
@@ -212,10 +207,8 @@ class ContainerConfig:
             self.RECAPTCHA_PUBLIC_KEY = dt["RECAPTCHA_PUBLIC_KEY"]
             self.RECAPTCHA_PRIVATE_KEY = dt["RECAPTCHA_PRIVATE_KEY"]
             self.SENTRY_DSN = dt["SENTRY_DSN"]
-            self.REDIS_PORT = dt["REDIS_PORT"]
-            self.REDIS_HOST = dt["REDIS_HOST"]
-            self.DEBUG = dt["DEBUG"] == "True"
-            self.TESTING = dt["TESTING"] == "True"
+            self.DEBUG = dt["DEBUG"] is True
+            self.TESTING = dt["TESTING"] is True
             self.AMBUDA_BOT_PASSWORD = dt["AMBUDA_BOT_PASSWORD"]
             self.GOOGLE_APPLICATION_CREDENTIALS = dt["GOOGLE_APPLICATION_CREDENTIALS"]
             self.STATIC_DIR = dt["STATIC_DIR"]
@@ -277,20 +270,22 @@ def __validate_config(config: ContainerConfig):
         assert os.file_exists(google_creds)
 
 
-def __get_container_config_for(x: str) -> ContainerConfig:
-    if x not in [DEFAULT, TESTING, DEVELOPMENT, STAGING, PRODUCTION]:
-        raise ValueError(f"Unknown container config type: {x}")
-    return ContainerConfig(__read_env(
-        "/data/container.toml",
-        __read_env_file("/app/deploy/envars/container.toml")[x],
-        x))
+def __get_container_config_from(type: str, file_path: str) -> ContainerConfig:
+    if type not in [DEFAULT, TESTING, DEVELOPMENT, STAGING, PRODUCTION]:
+        raise ValueError(f"Unknown container config type: {type}")
+
+    de = __read_env_file("/app/deploy/envars/container.toml")[DEFAULT]
+    ce = __read_env_file(file_path) if file_path else __read_env_file("/app/deploy/envars/container.toml")[type]
+    e = __read_env(
+        "container",
+        de,
+        ce,)
+    return ContainerConfig(e)
 
 
 def load_config_object(name: str):
     """Load and validate an application config."""
-
-    # config_map = {x: __get_container_config_for(x) for x in [TESTING, DEVELOPMENT, STAGING, PRODUCTION]}
-    config = __get_container_config_for(name)
+    config = __get_container_config_from(name, '')
     __validate_config(config)
     return config
 
@@ -306,9 +301,9 @@ def read_remote_host_config(section: str) -> RemoteHostConfig:
         print(os.read_file_as_string(template))
         os.exit(-1)
     e = __read_env(
-        file,
+        "remote",
         __read_env_file(template)['label'],
-        section
+        __read_env_file(file)[section]
     )
     return RemoteHostConfig(e)
 
@@ -320,19 +315,20 @@ def read_host_config() -> HostConfig:
         git.head_sha(),
         "127.0.0.1",
         __read_env(
-            f"{__get_host_data_dir()}/host.toml",
-            __read_env_file("deploy/envars/host.toml")
+            "host",
+            __read_env_file("deploy/envars/host.toml"),
+            __read_env_file(f"{__get_host_data_dir()}/host.toml"),
         )
     )
 
 
 def __read_container_config() -> ContainerConfig:
-    config = __get_container_config_for(DEFAULT)
+    config = __get_container_config_from(DEFAULT, CONTAINER_FILE_STD)
     __validate_config(config)
     return config
 
 
-if __file__ == "/app/unstd/config.py":
+if __file__ == "/app/unstd/config.py" or os.file_exists("/app/unstd/config.py"):
     current = __read_container_config()
 else:
     current = ContainerConfig(None)

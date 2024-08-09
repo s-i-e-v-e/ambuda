@@ -1,14 +1,9 @@
 """Background tasks for proofing projects."""
 
-
-from celery import group
-from celery.result import GroupResult
-
 from ambuda import consts
 from ambuda import database as db
 from ambuda import queries as q
 from ambuda.enums import SitePageStatus
-from ambuda.tasks import app
 from ambuda.utils import google_ocr
 from ambuda.utils.assets import get_page_image_filepath
 from ambuda.utils.revisions import add_revision
@@ -58,7 +53,6 @@ def _run_ocr_for_page_inner(
             ) from e
 
 
-@app.task(bind=True)
 def run_ocr_for_page(
     self,
     *,
@@ -76,16 +70,7 @@ def run_ocr_for_page(
 def run_ocr_for_project(
     app_env: str,
     project: db.Project,
-) -> GroupResult | None:
-    """Create a `group` task to run OCR on a project.
-
-    Usage:
-
-    >>> r = run_ocr_for_project(...)
-    >>> progress = r.completed_count() / len(r.results)
-
-    :return: the Celery result, or ``None`` if no tasks were run.
-    """
+):
     flask_app = create_config_only_app(app_env)
     with flask_app.app_context():
         unedited_pages = [p for p in project.pages if p.version == 0]
@@ -96,8 +81,7 @@ def run_ocr_for_project(
                 app_env=app_env,
                 project_slug=project.slug,
                 page_slug=p.slug,
-            )
-            for p in unedited_pages
+            ) for p in unedited_pages
         )
         ret = tasks.apply_async()
         # Save the result so that we can poll for it later. If we don't do

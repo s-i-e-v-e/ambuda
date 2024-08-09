@@ -22,17 +22,11 @@ spec:
       workingDir: /app
       command: ${CMD}
       volumeMounts:
-        - mountPath: /data
+        - mountPath: /data/ambuda
           name: data
-#        - mountPath: /app/static
-#          name: static
   volumes:
     - name: data
       hostPath:
         path: ${HOST_DATA_DIR}
         type: Directory
-#    - name: static
-#      hostPath:
-#        path: ${PWD}/static
-#        type: Directory
 status: { }

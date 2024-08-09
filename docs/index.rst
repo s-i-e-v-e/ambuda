@@ -51,9 +51,7 @@ Special topics
    :maxdepth: 2
 
    managing-the-database
-   background-tasks-with-celery
    i18n-and-l10n
-   running-in-production
    tei-xml
 
 
