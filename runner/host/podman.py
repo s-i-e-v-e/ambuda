@@ -8,6 +8,7 @@ def __get_image_names(os_name: str, hc: config.HostConfig) -> tuple[str, str]:
     base = f"ambuda-{hc.GIT_BRANCH}-{os_name}"
     return f"{base}:{hc.AMBUDA_VERSION}-{hc.GIT_SHA}", f"{base}:latest"
 
+
 cfg = config.read_host_config()
 PODMAN_DIR = f"/{os.get_tmp_dir()}/podman"
 

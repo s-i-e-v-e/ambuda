@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from unstd import config
-cfg = config.read_container_config()
+cfg = config.current
 
 from werkzeug.security import check_password_hash, generate_password_hash
 from sqlite3 import Connection, connect

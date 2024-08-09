@@ -7,7 +7,7 @@ os.fix_venv('/venv')
 from container import vidyut_initialize, db_initialize, verify, code_test, cli
 from runner import help
 
-cfg = config.read_container_config()
+cfg = config.current
 
 
 def __start():

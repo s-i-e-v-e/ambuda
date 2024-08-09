@@ -326,13 +326,13 @@ def read_host_config() -> HostConfig:
     )
 
 
-def read_container_config() -> ContainerConfig:
+def __read_container_config() -> ContainerConfig:
     config = __get_container_config_for(DEFAULT)
     __validate_config(config)
     return config
 
 
 if __file__ == "/app/unstd/config.py":
-    current = read_container_config()
+    current = __read_container_config()
 else:
     current = ContainerConfig(None)
