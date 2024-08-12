@@ -1,97 +1,17 @@
 """Views for basic site pages."""
-import logging
 from datetime import datetime, timedelta
-from pathlib import Path
-
-from flask import Blueprint, current_app, flash, render_template
-from flask_login import current_user
-from flask_wtf import FlaskForm
-from slugify import slugify
+from flask import Blueprint, render_template
 from sqlalchemy import orm
-from wtforms import FileField, RadioField, StringField
-from wtforms.validators import DataRequired, ValidationError
-from wtforms.widgets import TextArea
+
 
 from ambuda import consts
 from ambuda import database as db
 from ambuda import queries as q
 from ambuda.enums import SitePageStatus
-from ambuda.views.proofing.decorators import moderator_required, p2_required
-from ambuda.std import executor, kvs
-import ambuda.ocr.do_image_extraction
-import ambuda.repo.project
+from ambuda.views.proofing.decorators import moderator_required
 
-from unstd import os
 
 bp = Blueprint("proofing", __name__)
-
-
-def _is_allowed_document_file(filename: str) -> bool:
-    """True iff we accept this type of document upload."""
-    return Path(filename).suffix == ".pdf"
-
-
-def _required_if_archive(message: str):
-    def fn(form, field):
-        source = form.pdf_source.data
-        if source == "archive.org" and not field.data:
-            raise ValidationError(message)
-
-    return fn
-
-
-def _required_if_local(message: str):
-    def fn(form, field):
-        source = form.pdf_source.data
-        if source == "local" and not field.data:
-            raise ValidationError(message)
-
-    return fn
-
-
-class CreateProjectForm(FlaskForm):
-    pdf_source = RadioField(
-        "Source",
-        choices=[
-            ("archive.org", "From archive.org"),
-            ("local", "From my computer"),
-        ],
-        validators=[DataRequired()],
-    )
-    archive_identifier = StringField(
-        "archive.org identifier",
-        validators=[
-            _required_if_archive("Please provide a valid archive.org identifier.")
-        ],
-    )
-    local_file = FileField(
-        "PDF file", validators=[_required_if_local("Please provide a PDF file.")]
-    )
-    local_title = StringField(
-        "Title of the book (you can change this later)",
-        validators=[
-            _required_if_local(
-                "Please provide a title for your PDF.",
-            )
-        ],
-    )
-
-    license = RadioField(
-        "License",
-        choices=[
-            ("public", "Public domain"),
-            ("copyrighted", "Copyrighted"),
-            ("other", "Other"),
-        ],
-        validators=[DataRequired()],
-    )
-    custom_license = StringField(
-        "License",
-        widget=TextArea(),
-        render_kw={
-            "placeholder": "Please tell us about this book's license.",
-        },
-    )
 
 
 @bp.route("/")
@@ -167,80 +87,6 @@ def complete_guide():
 def editor_guide():
     """Describe how to use the page editor."""
     return render_template("proofing/editor-guide.html")
-
-
-@bp.route("/create-project", methods=["GET", "POST"])
-@p2_required
-def create_project():
-    import unstd.config
-    form = CreateProjectForm()
-    if form.validate_on_submit():
-        title = form.local_title.data
-
-        # TODO: add timestamp to slug for extra uniqueness?
-        slug = slugify(title)
-
-        # We accept only PDFs, so validate that the user hasn't uploaded some
-        # other kind of document format.
-        filename = form.local_file.raw_data[0].filename
-        if not _is_allowed_document_file(filename):
-            flash("Please upload a PDF.")
-            return render_template("proofing/create-project.html", form=form)
-
-        # Create all directories for this project ahead of time.
-        # FIXME(arun): push this further into the Celery task.
-        project_dir = Path(unstd.config.current.FLASK_UPLOAD_DIR) / "projects" / slug
-        pdf_dir = project_dir / "pdf"
-        page_image_dir = project_dir / "pages"
-        os.make_dir(pdf_dir.__str__())
-        os.make_dir(page_image_dir.__str__())
-
-        # Save the original PDF so that it can be downloaded later or reused
-        # for future tasks (thumbnails, better image formats, etc.)
-        pdf_path = pdf_dir / "source.pdf"
-        form.local_file.data.save(pdf_path)
-
-        # get page count
-        num_pages = ambuda.ocr.do_image_extraction.get_page_count(pdf_path.__str__())
-
-        # add project to database
-        logging.info(f'Received upload task "{title}" for path {pdf_path}.')
-        ambuda.repo.project.add(
-            display_title=title,
-            creator_id=current_user.id,
-            num_pages=num_pages
-        )
-
-        # start splitting pdf into images
-        task_id = ambuda.ocr.do_image_extraction.split_pdf_into_pages(pdf_path, page_image_dir)
-        kvs.set(f"{task_id}.slug", slug)
-        ts = executor.ts_get(task_id)
-        return render_template(
-            "proofing/create-project-post.html",
-            status=ts.status,
-            current=0,
-            total=0,
-            percent=0,
-            task_id=ts.id,
-        )
-
-    return render_template("proofing/create-project.html", form=form)
-
-
-@bp.route("/status/<task_id>")
-def create_project_status(task_id):
-    """AJAX summary of the task."""
-    ts = executor.ts_get(task_id)
-    slug = kvs.get(f"{task_id}.slug")
-    executor.status()
-    return render_template(
-        "include/task-progress.html",
-        status=ts.status,
-        current=ts.current,
-        total=ts.total,
-        percent=ts.percentage,
-        slug=slug,
-    )
 
 
 @bp.route("/recent-changes")
@@ -330,3 +176,15 @@ def dashboard():
         num_contributors_7d=num_contributors_7d,
         num_contributors_1d=num_contributors_1d,
     )
+
+
+from ambuda.views.proofing import project_create
+
+@bp.route("/create-project", methods=["GET", "POST"])
+def create_project():
+    return project_create.create_project()
+
+
+@bp.route("/status/<task_id>")
+def create_project_status(task_id):
+    return project_create.create_project_status(task_id)

@@ -3,9 +3,7 @@ import re
 
 from flask import (
     Blueprint,
-    current_app,
     flash,
-    make_response,
     render_template,
     request,
     url_for,
@@ -32,7 +30,6 @@ from wtforms_sqlalchemy.fields import QuerySelectField
 
 from ambuda import database as db
 from ambuda import queries as q
-from ambuda.ocr import do_ocr
 from ambuda.utils import project_utils, proofing_utils
 from ambuda.utils.revisions import add_revision
 from ambuda.views.proofing.decorators import moderator_required, p2_required
@@ -249,62 +246,6 @@ def edit(slug):
         project=project_,
         form=form,
     )
-
-
-@bp.route("/<slug>/download/")
-def download(slug):
-    """Download the project in various output formats."""
-    project_ = q.project(slug)
-    if project_ is None:
-        abort(404)
-
-    return render_template("proofing/projects/download.html", project=project_)
-
-
-@bp.route("/<slug>/download/text")
-def download_as_text(slug):
-    """Download the project as plain text."""
-    project_ = q.project(slug)
-    if project_ is None:
-        abort(404)
-
-    content_blobs = [
-        p.revisions[-1].content if p.revisions else "" for p in project_.pages
-    ]
-    raw_text = proofing_utils.to_plain_text(content_blobs)
-
-    response = make_response(raw_text, 200)
-    response.mimetype = "text/plain"
-    return response
-
-
-@bp.route("/<slug>/download/xml")
-def download_as_xml(slug):
-    """Download the project as TEI XML.
-
-    This XML will likely have various errors, but it is correct enough that it
-    still saves a lot of manual work.
-    """
-    project_ = q.project(slug)
-    if project_ is None:
-        abort(404)
-
-    project_meta = {
-        "title": project_.display_title,
-        "author": project_.author,
-        "publication_year": project_.publication_year,
-        "publisher": project_.publisher,
-        "editor": project_.editor,
-    }
-    project_meta = {k: v or "TODO" for k, v in project_meta.items()}
-    content_blobs = [
-        p.revisions[-1].content if p.revisions else "" for p in project_.pages
-    ]
-    xml_blob = proofing_utils.to_tei_xml(project_meta, content_blobs)
-
-    response = make_response(xml_blob, 200)
-    response.mimetype = "text/xml"
-    return response
 
 
 @bp.route("/<slug>/stats")
@@ -653,78 +594,6 @@ def confirm_changes(slug):
     return render_template(url_for("proofing.project.edit", slug=slug))
 
 
-@bp.route("/<slug>/batch-ocr", methods=["GET", "POST"])
-@p2_required
-def batch_ocr(slug):
-    import unstd.config
-    project_ = q.project(slug)
-    if project_ is None:
-        abort(404)
-
-    if request.method == "POST":
-        task = do_ocr.run_ocr_for_project(
-            app_env=unstd.config.current.AMBUDA_ENVIRONMENT,
-            project=project_,
-        )
-        if task:
-            return render_template(
-                "proofing/projects/batch-ocr-post.html",
-                project=project_,
-                status="PENDING",
-                current=0,
-                total=0,
-                percent=0,
-                task_id=task.id,
-            )
-        else:
-            flash(_l("All pages in this project have at least one edit already."))
-
-    return render_template(
-        "proofing/projects/batch-ocr.html",
-        project=project_,
-    )
-
-
-@bp.route("/batch-ocr-status/<task_id>")
-def batch_ocr_status(task_id):
-    from celery.result import GroupResult
-    r = GroupResult.restore(task_id, app=celery_app)
-    assert r, task_id
-
-    if r.results:
-        current = r.completed_count()
-        total = len(r.results)
-        percent = current / total
-
-        status = None
-        if total:
-            if current == total:
-                status = "SUCCESS"
-            else:
-                status = "PROGRESS"
-        else:
-            status = "FAILURE"
-
-        data = {
-            "status": status,
-            "current": current,
-            "total": total,
-            "percent": percent,
-        }
-    else:
-        data = {
-            "status": "PENDING",
-            "current": 0,
-            "total": 0,
-            "percent": 0,
-        }
-
-    return render_template(
-        "include/ocr-progress.html",
-        **data,
-    )
-
-
 @bp.route("/<slug>/admin", methods=["GET", "POST"])
 @moderator_required
 def admin(slug):
@@ -756,3 +625,27 @@ def admin(slug):
         project=project_,
         form=form,
     )
+
+from ambuda.views.proofing import project_download, project_ocr
+@bp.route("/<slug>/download/")
+def download(slug):
+    return project_download.download(slug)
+
+
+@bp.route("/<slug>/download/text")
+def download_as_text(slug):
+    return project_download.download_as_text(slug)
+
+
+@bp.route("/<slug>/download/xml")
+def download_as_xml(slug):
+    return project_download.download_as_xml(slug)
+
+@bp.route("/<slug>/batch-ocr", methods=["GET", "POST"])
+def batch_ocr(slug):
+    return project_ocr.batch_ocr(slug)
+
+
+@bp.route("/batch-ocr-status/<task_id>")
+def batch_ocr_status(task_id):
+    return project_ocr.batch_ocr_status(task_id)

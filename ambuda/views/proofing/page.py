@@ -5,7 +5,7 @@ The main route here is `edit`, which defines the page editor and the edit flow.
 
 from dataclasses import dataclass
 
-from flask import Blueprint, current_app, flash, render_template, send_file
+from flask import Blueprint, flash, render_template, send_file
 from flask_babel import lazy_gettext as _l
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
@@ -17,7 +17,7 @@ from wtforms.widgets import TextArea
 from ambuda import database as db
 from ambuda import queries as q
 from ambuda.enums import SitePageStatus
-from ambuda.utils import google_ocr, project_utils
+from ambuda.utils import project_utils
 from ambuda.utils.assets import get_page_image_filepath
 from ambuda.utils.diff import revision_diff
 from ambuda.utils.revisions import EditError, add_revision
@@ -282,5 +282,8 @@ def ocr(project_slug, page_slug):
         abort(404)
 
     image_path = get_page_image_filepath(project_slug, page_slug)
-    ocr_response = google_ocr.run(image_path)
-    return ocr_response.text_content
+
+    from ambuda.ocr import backend
+    #ocr_text, _ = backend.exec_google_ocr(image_path)
+    ocr_text, _ = backend.exec_tesseract_ocr(image_path)
+    return ocr_text

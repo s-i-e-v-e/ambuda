@@ -3,6 +3,7 @@ import pypdf
 
 from ambuda.std import id, executor
 
+
 def get_page_count(pdf_path: str) -> int:
     doc = pypdf.PdfReader(pdf_path)
     return len(doc.pages)
@@ -41,6 +42,5 @@ def split_pdf_into_pages(
     doc = pypdf.PdfReader(pdf_path)
     page_count = len(doc.pages)
     executor.ts_set(task_id, 0, page_count, 'PROGRESS')
-
     executor.exec(__split_pdf_into_pages, task_id, pdf_path, output_dir)
     return task_id
