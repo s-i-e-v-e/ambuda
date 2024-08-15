@@ -9,7 +9,7 @@ from ambuda.enums import SitePageStatus
 from ambuda.utils.assets import get_page_image_filepath
 from ambuda.utils.revisions import add_revision
 
-from ambuda.repo import user as user_repo
+from ambuda.repository import user as user_repo
 from ambuda.ocr import backend
 
 

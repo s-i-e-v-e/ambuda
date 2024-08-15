@@ -83,7 +83,7 @@ class CreateProjectForm(FlaskForm):
 
 @p2_required
 def create_project():
-    import ambuda.repo.project
+    import ambuda.repository.project
     import ambuda.ocr.do_image_extraction
     from unstd import os
     import unstd.config
@@ -119,7 +119,7 @@ def create_project():
 
         # add project to database
         logging.info(f'Received upload task "{title}" for path {pdf_path}.')
-        ambuda.repo.project.add(
+        ambuda.repository.project.add(
             display_title=title,
             creator_id=current_user.id,
             num_pages=num_pages
