@@ -17,20 +17,30 @@ import functools
 from flask import Blueprint, abort, redirect, render_template, request, url_for
 from indic_transliteration import detect, sanscript
 
-import ambuda.queries as q
 from ambuda.utils import xml
 from ambuda.utils.dict_utils import expand_apte_keys, expand_skd_keys, standardize_key
 from ambuda.views.api import bp as api
+from unstd.data import List
 
 bp = Blueprint("dictionaries", __name__)
 
+from ambuda.repository import DataSession, Dictionary, DictionaryEntry
 
 @functools.cache
-def _get_dictionary_data() -> dict[str, str]:
-    return {d.slug: d.title for d in q.dictionaries()}
+def __get_dictionary_data(ds: DataSession) -> dict[str, str]:
+    return (Dictionary
+            .select_all(ds)
+            .map(lambda x: {x.slug: x.title})
+            .dict())
+
+def __get_sources(dictionaries: dict[str, str], sources: list[str]) -> list[str]:
+    sources = [s for s in sources if s in dictionaries]
+    if not sources:
+        abort(404)
+    return sources
 
 
-def _create_query_keys(sources: list[str], query: str) -> list[str]:
+def __create_query_keys(sources: List[str], query: str) -> List[str]:
     query = query.strip()
     input_scheme = detect.detect(query)
     slp1_key = sanscript.transliterate(query, input_scheme, sanscript.SLP1)
@@ -43,13 +53,24 @@ def _create_query_keys(sources: list[str], query: str) -> list[str]:
     if "shabdakalpadruma" in sources:
         keys.extend(expand_skd_keys(slp1_key))
 
-    return keys
+    return List(keys)
+
+def entries(ds: DataSession, sources: List[str], query: str) -> List[tuple[str, List[str]]]:
+    def __entries(x: Dictionary, keys: List[str]) -> tuple[str, List[str]]:
+        return x.slug, (List
+                        .concat(keys.map(lambda y: DictionaryEntry.select(ds, x.id, y)))
+                        .map(lambda y: y.value)
+                        )
+
+    keys = __create_query_keys(sources, query)
+    return (Dictionary
+                  .select_all(ds)
+                  .filter(lambda x: sources.has(x.slug))
+                  .map(lambda x: __entries(x, keys))
+            )
 
 
-def _fetch_entries(sources: list[str], query: str) -> dict[str, str]:
-    keys = _create_query_keys(sources, query)
-    entries = q.dict_entries(sources, keys)
-
+def __fetch_entries(ds: DataSession, sources: list[str], query: str) -> dict[str, str]:
     transforms = {
         "apte": xml.transform_apte_sanskrit_english,
         "apte-sh": xml.transform_apte_sanskrit_hindi,
@@ -60,18 +81,19 @@ def _fetch_entries(sources: list[str], query: str) -> dict[str, str]:
         "shabdakalpadruma": xml.transform_mw,
     }
 
-    results = {}
-    for source_slug, source_entries in entries.items():
-        fn = transforms.get(source_slug, xml.transform_mw)
-        html_blobs = [fn(e.value) for e in source_entries]
-        results[source_slug] = html_blobs
-    return results
+    return (
+        entries(ds, List(sources), query)
+        .map(lambda xs: (x := xs[0], ys := xs[1], f := transforms.get(x, xml.transform_mw), {x: ys.map(f)})[-1])
+        .dict()
+    )
 
 
 def _handle_form_submission(
-    url_sources: list[str] | None = None, url_query: str | None = None
+        url_sources: list[str] | None = None,
+        url_query: str | None = None
 ):
-    """Handle a search request defined with query parameters.
+    """
+    Handle a search request defined with query parameters.
 
     If a user with JavaScript disabled clicks the Search button, the user's query
     will be encoded as URL parameters. Some examples:
@@ -103,12 +125,15 @@ def _handle_form_submission(
 
 @bp.route("/")
 def index():
+    """
+    Show the dictionary lookup tool.
+    """
     if request.args:
         return _handle_form_submission()
 
-    """Show the dictionary lookup tool."""
-    dictionaries = _get_dictionary_data()
-    return render_template("dictionaries/index.html", dictionaries=dictionaries)
+    with DataSession() as ds:
+        dictionaries = __get_dictionary_data(ds)
+        return render_template("dictionaries/index.html", dictionaries=dictionaries)
 
 
 @bp.route("/<list:sources>/")
@@ -116,9 +141,9 @@ def index_with_sources(sources):
     if request.args:
         return _handle_form_submission(sources)
 
-    safe_sources = [s for s in sources if s in _get_dictionary_data()]
-    if not safe_sources:
-        abort(404)
+    with DataSession() as ds:
+        dictionaries = __get_dictionary_data(ds)
+        __get_sources(dictionaries, sources)
 
     # TODO: set chosen dictionaries as UX view
     return redirect(url_for("dictionaries.index"))
@@ -126,35 +151,31 @@ def index_with_sources(sources):
 
 @bp.route("/<list:sources>/<query>")
 def entry(sources, query):
-    """Show a specific dictionary entry."""
+    """
+    Show a specific dictionary entry.
+    """
     if request.args:
         return _handle_form_submission(sources, query)
 
-    dictionaries = _get_dictionary_data()
-    sources = [s for s in sources if s in dictionaries]
-    if not sources:
-        abort(404)
-
-    entries = _fetch_entries(sources, query)
-    return render_template(
-        "dictionaries/index.html",
-        query=query,
-        entries=entries,
-        dictionaries=dictionaries,
-    )
+    with DataSession() as ds:
+        dictionaries = __get_dictionary_data(ds)
+        entries = __fetch_entries(ds, __get_sources(dictionaries, sources), query)
+        return render_template(
+            "dictionaries/index.html",
+            query=query,
+            entries=entries,
+            dictionaries=dictionaries,
+        )
 
 
 @api.route("/dictionaries/<list:sources>/<query>")
 def entry_htmx(sources, query):
-    dictionaries = _get_dictionary_data()
-    sources = [s for s in sources if s in dictionaries]
-    if not sources:
-        abort(404)
-
-    entries = _fetch_entries(sources, query)
-    return render_template(
-        "htmx/dictionary-results.html",
-        query=query,
-        entries=entries,
-        dictionaries=dictionaries,
-    )
+    with DataSession() as ds:
+        dictionaries = __get_dictionary_data(ds)
+        entries = __fetch_entries(ds, __get_sources(dictionaries, sources), query)
+        return render_template(
+            "htmx/dictionary-results.html",
+            query=query,
+            entries=entries,
+            dictionaries=dictionaries,
+        )

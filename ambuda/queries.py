@@ -113,40 +113,6 @@ def block_parse(block_id: int) -> db.BlockParse | None:
     session = get_session()
     return session.query(db.BlockParse).filter_by(block_id=block_id).first()
 
-# todo:
-# def dictionaries() -> list[db.Dictionary]:
-#     session = get_session()
-#     return session.query(db.Dictionary).all()
-
-
-# todo:
-# def dict_entries(
-#     sources: list[str], keys: list[str]
-# ) -> dict[str, list[db.DictionaryEntry]]:
-#     """
-#     :param sources: slugs of the dictionaries to query
-#     :param keys: the keys (dictionary entries) to query
-#     """
-#     session = get_session()
-#     dicts = dictionaries()
-#     source_ids = [d.id for d in dicts if d.slug in sources]
-#
-#     rows = (
-#         session.query(db.DictionaryEntry)
-#         .filter(
-#             (db.DictionaryEntry.dictionary_id.in_(source_ids))
-#             & (db.DictionaryEntry.key.in_(keys))
-#         )
-#         .all()
-#     )
-#
-#     dict_id_to_slug = {d.id: d.slug for d in dicts}
-#     mapping = {s: [] for s in sources}
-#     for row in rows:
-#         dict_slug = dict_id_to_slug[row.dictionary_id]
-#         mapping[dict_slug].append(row)
-#     return mapping
-
 
 def projects() -> list[db.Project]:
     """Return all projects in no particular order."""

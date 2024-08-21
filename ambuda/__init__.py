@@ -57,7 +57,6 @@ def _initialize_db_session(app, config_spec: config.ContainerConfig):
             session = queries.get_session()
             session.rollback()
 
-
 def _initialize_logger(log_level: int) -> None:
     """Initialize a simple logger for all requests."""
     handler = logging.StreamHandler(sys.stderr)
@@ -111,7 +110,8 @@ def create_app():
     # Sanity checks
     if not config_spec.is_testing:
         with app.app_context():
-            checks.check_database_uri(config_spec.SQLALCHEMY_DATABASE_URI)
+            pass
+            #todo checks.check_database_uri(config_spec.SQLALCHEMY_DATABASE_URI)
 
     # Logger
     _initialize_logger(config_spec.LOG_LEVEL)

@@ -42,6 +42,10 @@ def init_database(sql_uri: str, db_file_path: str, seed_type: str):
     engine = create_engine(sql_uri)
     db.Base.metadata.create_all(engine)
 
+    from ambuda.repository import DataSession, generate_schema
+    with DataSession() as ds:
+        generate_schema(ds)
+
     try:
         if seed_type == "all":
             seeding.all()

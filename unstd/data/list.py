@@ -41,6 +41,9 @@ class List[A]:
                 ys.append(x)
         return List[A](ys)
 
+    def has(self, x: A) -> bool:
+        return x in self.xs
+
     def dict(self):
         d = dict()
         for x in self.xs:

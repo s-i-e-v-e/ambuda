@@ -2,7 +2,7 @@ from unstd.data import List
 from ambuda.repository import DataSession
 
 CREATE = """
-CREATE TABLE dictionary_entries (
+CREATE TABLE IF NOT EXISTS dictionary_entries (
 	id INTEGER NOT NULL, 
 	dictionary_id INTEGER NOT NULL, 
 	key VARCHAR NOT NULL, 
@@ -16,6 +16,13 @@ SELECT = """
 SELECT id, dictionary_id, key, value FROM dictionary_entries
 """
 
+INSERT = """
+INSERT INTO dictionary_entries(dictionary_id, key, value) VALUES(?, ?, ?);
+"""
+
+DELETE = """
+DELETE FROM dictionary_entries WHERE dictionary_id = ?;
+"""
 
 class DictionaryEntry:
     """
@@ -51,5 +58,11 @@ class DictionaryEntry:
             (dictionary_id, key))
         )
 
+    @staticmethod
+    def insert(ds: DataSession, dictionary_id: int, key: str, value: str):
+        ds.exec(INSERT, (dictionary_id, key, value))
 
+    @staticmethod
+    def delete_all(ds: DataSession, dictionary_id: int):
+        ds.exec(DELETE, (dictionary_id,))
 

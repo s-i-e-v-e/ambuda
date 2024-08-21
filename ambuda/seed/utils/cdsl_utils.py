@@ -3,9 +3,6 @@ import itertools
 import logging
 from xml.etree import ElementTree as ET
 
-from sqlalchemy.orm import Session
-
-import ambuda.database as db
 
 #: The maximum number of entries to add to the dictionary at one time.
 #:
@@ -45,26 +42,6 @@ def iter_entries_as_strings(blob: str):
         yield key, value
 
 
-def create_dict(session, **kw):
-    """Create a new dictionary."""
-    dictionary = db.Dictionary(**kw)
-    session.add(dictionary)
-    session.commit()
-    return dictionary
-
-
-def delete_existing_dict(session, slug: str):
-    """Delete an existing dictionary and all of its entries."""
-    dictionary = session.query(db.Dictionary).filter_by(slug=slug).first()
-    if dictionary:
-        # Delete entries first to avoid slow relationship-based delete.
-        session.query(db.DictionaryEntry).filter_by(
-            dictionary_id=dictionary.id
-        ).delete()
-        session.delete(dictionary)
-        session.commit()
-
-
 def batches(generator, n):
     while True:
         batch = list(itertools.islice(generator, n))
@@ -75,22 +52,22 @@ def batches(generator, n):
 
 
 def create_from_scratch(engine, slug: str, title: str, generator):
-    with Session(engine) as session:
-        delete_existing_dict(session, slug)
+    from ambuda.repository import DataSession, Dictionary, DictionaryEntry
 
-        dictionary = create_dict(session, slug=slug, title=title)
-        dictionary_id = dictionary.id
-        assert dictionary_id
+    with DataSession() as ds:
+        # Delete existing dictionary and all of its entries.
+        d = Dictionary.select_by_slug(ds, slug)
+        if d:
+            DictionaryEntry.delete_all(ds, d.id)
+            Dictionary.delete(ds, d.slug)
 
-    entries = db.DictionaryEntry.__table__
-    ins = entries.insert()
-    with engine.connect() as conn:
+        # Create a new dictionary
+        Dictionary.insert(ds, slug, title)
+        d = Dictionary.select_by_slug(ds, slug)
+
+        assert d and d.id
+
         for i, batch in enumerate(batches(generator, BATCH_SIZE)):
-            items = []
             for key, value in batch:
-                items.append(
-                    {"dictionary_id": dictionary.id, "key": key, "value": value}
-                )
-            conn.execute(ins, items)
-            conn.commit()
+                DictionaryEntry.insert(ds, d.id, key, value)
             logging.info(BATCH_SIZE * (i + 1))

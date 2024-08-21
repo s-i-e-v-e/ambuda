@@ -8,13 +8,24 @@ class DataSession:
         from unstd import config
         cfg = config.current
         self.con = connect(cfg.DATABASE_FILE)
+        self.con.isolation_level = None
 
     def __enter__(self):
+        self.begin()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.con.commit()
+        self.commit()
         self.con.close()
+
+    def begin(self):
+        self.con.execute("BEGIN")
+
+    def commit(self):
+        self.con.execute("COMMIT")
+
+    def rollback(self):
+        self.con.execute("ROLLBACK")
 
     def exec(self, sql: str, *args, **kwargs) -> List:
         return List(self.con.execute(sql, *args, **kwargs).fetchall())
@@ -28,7 +39,9 @@ from ambuda.repository import (
     dictionary_entry
 )
 
+Dictionary = dictionary.Dictionary
+DictionaryEntry = dictionary_entry.DictionaryEntry
+
 def generate_schema(ds: DataSession):
     ds.exec(dictionary.CREATE)
     ds.exec(dictionary_entry.CREATE)
-
