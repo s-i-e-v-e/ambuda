@@ -1,7 +1,11 @@
-import os
+from os import path
 import sys
 from typing import List
 sys.path.extend(["./", "./unstd"])
+import pathlib
+for p in sys.path:
+    print(pathlib.Path(p).resolve())
+
 import yaml
 import unstd.os
 

@@ -47,21 +47,10 @@ def init_database(sql_uri: str, db_file_path: str, seed_type: str):
             seeding.all()
         else:
             seeding.basic()
-        alembic_migrations()
     except Exception as init_ex:
         print(f"Error: Failed to initialize database. Error: {init_ex}")
         raise init_ex
     print(f"Success! Database initialized at {db_file_path}")
-
-
-def alembic_migrations():
-    try:
-        subprocess.run(["alembic", "ensure_version"])
-        subprocess.run(["alembic", "stamp", "head"])
-        print("Success! Database version check completed.")
-    except subprocess.CalledProcessError as mig_ex:
-        print(f"Error processing alembic commands - {mig_ex}")
-        raise mig_ex
 
 
 def load_database(db_file_path: str):
@@ -72,7 +61,6 @@ def load_database(db_file_path: str):
 
     try:
         run_module(lookup)
-        subprocess.run(["alembic", "upgrade", "head"])
         print(f"Success! Database is ready at {db_file_path}")
     except Exception as load_ex:
         print(f"Error: Failed to load database. Error: {load_ex}")

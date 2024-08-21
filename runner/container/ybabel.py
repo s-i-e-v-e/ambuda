@@ -10,7 +10,7 @@ def init(locale):
             "-i",
             "messages.pot",
             "-d",
-            "/app/ambuda/translations",
+            "/ambuda/app/ambuda/translations",
             f"--locale {locale}",
         ]
     )
@@ -36,11 +36,11 @@ def extract():
 # Update all translation files with new text from `messages.pot`
 def update():
     unstd.os.run(
-        ["pybabel", "update", "-i", "messages.pot", "-d", "/app/ambuda/translations"]
+        ["pybabel", "update", "-i", "messages.pot", "-d", "/ambuda/app/ambuda/translations"]
     )
 
 
 # Compile all translation files.
 # NOTE: you probably want `make install-i18n` instead.
 def compile():
-    unstd.os.run(["pybabel", "compile", "-d", "/app/ambuda/translations"])
+    unstd.os.run(["pybabel", "compile", "-d", "/ambuda/app/ambuda/translations"])

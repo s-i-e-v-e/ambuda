@@ -44,7 +44,7 @@ class DictionaryEntry:
         self.value = value
 
     @staticmethod
-    def select(ds: DataSession, dictionary_id: int, key: str) -> List[DictionaryEntry]:
+    def select(ds: DataSession, dictionary_id: int, key: str) -> "List[DictionaryEntry]":
         return (ds.build(
             DictionaryEntry.__builder,
             f"{SELECT} WHERE dictionary_id = ? AND key = ?",

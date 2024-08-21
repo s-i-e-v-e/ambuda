@@ -23,15 +23,6 @@ from ambuda.mail import mailer
 from ambuda.utils import assets
 from ambuda.utils.json_serde import AmbudaJSONEncoder
 from ambuda.utils.url_converters import ListConverter
-from ambuda.views.about import bp as about
-from ambuda.views.api import bp as api
-from ambuda.views.auth import bp as auth
-from ambuda.views.blog import bp as blog
-from ambuda.views.dictionaries import bp as dictionaries
-from ambuda.views.proofing import bp as proofing
-from ambuda.views.reader.parses import bp as parses
-from ambuda.views.reader.texts import bp as texts
-from ambuda.views.site import bp as site
 
 
 def _initialize_sentry(sentry_dsn: str):
@@ -75,6 +66,27 @@ def _initialize_logger(log_level: int) -> None:
     )
     logging.getLogger().setLevel(log_level)
     logging.getLogger().addHandler(handler)
+
+
+def __init_blueprints(app) -> None:
+    from ambuda.views.about import bp as about
+    from ambuda.views.api import bp as api
+    from ambuda.views.auth import bp as auth
+    from ambuda.views.blog import bp as blog
+    from ambuda.views.dictionaries import bp as dictionaries
+    from ambuda.views.proofing import bp as proofing
+    from ambuda.views.reader.parses import bp as parses
+    from ambuda.views.reader.texts import bp as texts
+    from ambuda.views.site import bp as site
+    app.register_blueprint(about, url_prefix="/about")
+    app.register_blueprint(api, url_prefix="/api")
+    app.register_blueprint(auth)
+    app.register_blueprint(blog, url_prefix="/blog")
+    app.register_blueprint(dictionaries, url_prefix="/tools/dictionaries")
+    app.register_blueprint(parses, url_prefix="/parses")
+    app.register_blueprint(proofing, url_prefix="/proofing")
+    app.register_blueprint(site)
+    app.register_blueprint(texts, url_prefix="/texts")
 
 
 def create_app():
@@ -126,15 +138,7 @@ def create_app():
     app.url_map.converters["list"] = ListConverter
 
     # Blueprints
-    app.register_blueprint(about, url_prefix="/about")
-    app.register_blueprint(api, url_prefix="/api")
-    app.register_blueprint(auth)
-    app.register_blueprint(blog, url_prefix="/blog")
-    app.register_blueprint(dictionaries, url_prefix="/tools/dictionaries")
-    app.register_blueprint(parses, url_prefix="/parses")
-    app.register_blueprint(proofing, url_prefix="/proofing")
-    app.register_blueprint(site)
-    app.register_blueprint(texts, url_prefix="/texts")
+    __init_blueprints(app)
 
     # Debug-only routes for local development.
     if app.debug or config_spec.is_testing:

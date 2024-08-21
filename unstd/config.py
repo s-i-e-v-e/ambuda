@@ -13,7 +13,7 @@ STAGING = "staging"
 #: The production environment. For production serving.
 PRODUCTION = "production"
 
-DIR_STD = "/data/ambuda"
+DIR_STD = "/ambuda/data"
 CONTAINER_FILE_STD = f"{DIR_STD}/container.toml"
 LOCAL = ".local/share/ambuda"
 def __get_host_data_dir() -> str:
@@ -274,8 +274,8 @@ def __get_container_config_from(type: str, file_path: str) -> ContainerConfig:
     if type not in [DEFAULT, TESTING, DEVELOPMENT, STAGING, PRODUCTION]:
         raise ValueError(f"Unknown container config type: {type}")
 
-    de = __read_env_file("/app/deploy/envars/container.toml")[DEFAULT]
-    ce = __read_env_file(file_path) if file_path else __read_env_file("/app/deploy/envars/container.toml")[type]
+    de = __read_env_file("/ambuda/app/deploy/envars/container.toml")[DEFAULT]
+    ce = __read_env_file(file_path) if file_path else __read_env_file("/ambuda/app/deploy/envars/container.toml")[type]
     e = __read_env(
         "container",
         de,
@@ -328,7 +328,7 @@ def __read_container_config() -> ContainerConfig:
     return config
 
 
-if __file__ == "/app/unstd/config.py" or os.file_exists("/app/unstd/config.py"):
+if __file__ == "/ambuda/app/unstd/config.py" or os.file_exists("/ambuda/app/unstd/config.py"):
     current = __read_container_config()
 else:
     current = ContainerConfig(None)

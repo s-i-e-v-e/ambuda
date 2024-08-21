@@ -1,18 +1,14 @@
 FROM base as node
 WORKDIR /
-RUN mkdir /data
-RUN mkdir /data/database
-RUN mkdir /app
-WORKDIR /app
+RUN mkdir -p /ambuda/app
+WORKDIR /ambuda/app
 RUN npm install -D tailwindcss esbuild @tailwindcss/typography concurrently jest
 
 FROM node as npx
-COPY ./static /app/static
-COPY ./tailwind.config.js /app/
-#RUN npx tailwindcss -i /app/static/css/style.css -o /app/static/gen/style.css --minify \
-#    && npx esbuild /app/static/js/main.js --outfile=/app/static/gen/main.js --bundle --minify
-RUN npx tailwindcss -i /app/static/css/style.css -o /app/static/gen/style.css \
-    && npx esbuild /app/static/js/main.js --outfile=/app/static/gen/main.js --bundle
+COPY ./static ./static
+COPY ./tailwind.config.js ./
+RUN npx tailwindcss -i ./static/css/style.css -o ./static/gen/style.css --minify \
+    && npx esbuild ./static/js/main.js --outfile=./static/gen/main.js --bundle --minify
 
 FROM npx as python
 ENV PYTHONFAULTHANDLER=1 \
@@ -20,27 +16,26 @@ ENV PYTHONFAULTHANDLER=1 \
   PIP_NO_CACHE_DIR=1 \
   PIP_DISABLE_PIP_VERSION_CHECK=1 \
   PIP_DEFAULT_TIMEOUT=100
-RUN python -m venv --system-site-packages /venv
-ENV PATH="/venv/bin:/bin:$PATH"
-RUN source /venv/bin/activate
+RUN python -m venv --system-site-packages /ambuda/.venv
+ENV PATH="/ambuda/.venv/bin:/bin:$PATH"
+RUN source /ambuda/.venv/bin/activate
 RUN python -m pip install --upgrade pip
-COPY ./deploy/deps.runtime.yml /app/deploy/
-COPY ./unstd /app/unstd
-COPY ./runner/container/install.py /app/runner/container/
-COPY ./ar /app/ar
+COPY ./deploy/deps.runtime.yml ./deploy/
+COPY ./unstd ./unstd
+COPY ./runner/container/install.py ./runner/container/
+COPY ./ar ./ar
 RUN ./ar install ${OS_NAME}
 
 FROM python as final
-#RUN git clone https://github.com/s-i-e-v-e/ambuda /app
+#RUN git clone https://github.com/s-i-e-v-e/ambuda /ambuda/app
 #    && git switch podman
-COPY ./ambuda /app/ambuda
-COPY ./deploy /app/deploy
-COPY ./migrations /app/migrations
-COPY ./runner /app/runner
-COPY ./test /app/test
-COPY ./unstd /app/unstd
-COPY ./alembic.ini /app/alembic.ini
-COPY ./ar /app/ar
-COPY ./wsgi.py /app/wsgi.py
+COPY ./ambuda ./ambuda
+COPY ./deploy ./deploy
+COPY ./runner ./runner
+COPY ./test ./test
+COPY ./unstd ./unstd
+COPY ./ar ./ar
+COPY ./wsgi.py ./wsgi.py
+COPY ./static/gen/style.css ./static/gen/style.css
 RUN ./ar i18n
 RUN echo "************* PODMAN IMAGE BUILT *****************"

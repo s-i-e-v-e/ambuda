@@ -19,10 +19,10 @@ spec:
         privileged: false
         readOnlyRootFilesystem: false
         seLinuxOptions: { }
-      workingDir: /app
+      workingDir: /ambuda/app
       command: ${CMD}
       volumeMounts:
-        - mountPath: /data/ambuda
+        - mountPath: /ambuda/data
           name: data
   volumes:
     - name: data

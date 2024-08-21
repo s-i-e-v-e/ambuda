@@ -3,7 +3,7 @@ sys.path.extend(["./"])
 
 from typing import List
 from unstd import config, os
-os.fix_venv('/venv')
+os.fix_venv('/ambuda/.venv')
 from container import vidyut_initialize, db_initialize, verify, code_test, cli
 from runner import help
 

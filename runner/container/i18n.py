@@ -33,7 +33,7 @@ def generate(args: List[str]):
     src_dir = f"{git_dir}/translations"
     __compile_translations(src_dir)
 
-    dest_dir = "/app/ambuda/translations"
+    dest_dir = "/ambuda/app/ambuda/translations"
 
     unstd.os.make_dir(dest_dir)
     __copy_translation_files(src_dir, dest_dir)

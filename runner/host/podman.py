@@ -50,7 +50,7 @@ def run(args: List[str]):
     os.copy_file("deploy/containers/podman.yml", pod_file)
 
     # pass arguments to init script
-    xs = ["/app/ar", "container", "init"]
+    xs = ["/ambuda/app/ar", "container", "init"]
     for a in args:
         xs.append(a)
 
@@ -127,6 +127,6 @@ def copy_to(args: List[str]):
 
 def exec(args: List[str]):
     xs = []
-    xs.extend(["podman", "exec", cfg.CONTAINER_NAME, "/app/ar", "container"])
+    xs.extend(["podman", "exec", cfg.CONTAINER_NAME, "/ambuda/app/ar", "container"])
     xs.extend(args)
     os.run(xs)

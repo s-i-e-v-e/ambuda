@@ -39,7 +39,7 @@ class Dictionary:
         self.title = title
 
     @staticmethod
-    def select_by_slug(ds: DataSession, slug: str) -> Optional[Dictionary]:
+    def select_by_slug(ds: DataSession, slug: str) -> "Optional[Dictionary]":
         return (ds.build(
             __builder,
             f"{SELECT} WHERE slug = ?",
@@ -47,7 +47,7 @@ class Dictionary:
         )).optional_head()
 
     @staticmethod
-    def select_by_id(ds: DataSession, id: int) -> Optional[Dictionary]:
+    def select_by_id(ds: DataSession, id: int) -> "Optional[Dictionary]":
         return (ds.build(
             __builder,
             f"{SELECT} WHERE id = ?",
@@ -55,7 +55,7 @@ class Dictionary:
         )).optional_head()
 
     @staticmethod
-    def select_all(ds: DataSession) -> List[Dictionary]:
+    def select_all(ds: DataSession) -> "List[Dictionary]":
         return (ds.build(
             __builder,
             SELECT,
