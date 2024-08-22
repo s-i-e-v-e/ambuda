@@ -107,6 +107,10 @@ def create_app():
     # Config
     app.config.from_object(config_spec)
 
+    # init direct database
+    import ambuda.repository
+    ambuda.repository.set_database_file(config_spec.DATABASE_FILE)
+
     # Sanity checks
     if not config_spec.is_testing:
         with app.app_context():

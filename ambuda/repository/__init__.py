@@ -1,13 +1,19 @@
 from sqlite3 import Connection, connect
 from unstd.data import List, Callable
 
+DATABASE_FILE = ""
+
+
+def set_database_file(x: str):
+    global DATABASE_FILE
+    DATABASE_FILE = x
+
 class DataSession:
     con: Connection
 
     def __init__(self):
-        from unstd import config
-        cfg = config.current
-        self.con = connect(cfg.DATABASE_FILE)
+        global DATABASE_FILE
+        self.con = connect(DATABASE_FILE)
         self.con.isolation_level = None
 
     def __enter__(self):
