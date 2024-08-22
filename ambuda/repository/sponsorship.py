@@ -21,7 +21,7 @@ DELETE FROM site_project_sponsorship WHERE id = ?;
 """
 
 SELECT = """
-SELECT id, sa_title, en_title, description, cost_inr FROM site_project_sponsorship;
+SELECT id, sa_title, en_title, description, cost_inr FROM site_project_sponsorship
 """
 
 
@@ -54,7 +54,7 @@ class ProjectSponsorship:
 
     @staticmethod
     def delete(ds: DataSession, id: int):
-        ds.exec(DELETE, (int,))
+        ds.exec(DELETE, (id,))
 
     @staticmethod
     def __builder(xs):

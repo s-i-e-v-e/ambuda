@@ -212,11 +212,6 @@ def blog_posts() -> list[db.BlogPost]:
     return session.query(db.BlogPost).order_by(db.BlogPost.created_at.desc()).all()
 
 
-def contributor_info() -> list[db.ContributorInfo]:
-    session = get_session()
-    return session.query(db.ContributorInfo).order_by(db.ContributorInfo.name).all()
-
-
 def genres() -> list[db.Genre]:
     session = get_session()
     return session.query(db.Genre).all()

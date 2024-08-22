@@ -37,8 +37,10 @@ def core():
 
 @people.route("/proofing")
 def proofing():
-    contributors = q.contributor_info()
-    return render_template("about/people/proofing.html", contributors=contributors)
+    from ambuda.repository import DataSession, ContributorInfo
+    with DataSession() as ds:
+        contributors = ContributorInfo.all(ds)
+        return render_template("about/people/proofing.html", contributors=contributors)
 
 
 @bp.route("/code-and-data")

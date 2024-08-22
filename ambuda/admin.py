@@ -107,6 +107,6 @@ def create_admin_manager(app):
     admin.add_view(UserView(db.User, session))
     admin.add_view(GenreView(db.Genre, session))
     #todo: admin.add_view(SponsorshipView(db.ProjectSponsorship, session))
-    admin.add_view(ContributorInfoView(db.ContributorInfo, session))
+    #todo: admin.add_view(ContributorInfoView(db.ContributorInfo, session))
 
     return admin

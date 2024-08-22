@@ -38,13 +38,16 @@ from ambuda.repository import (
     dictionary,
     dictionary_entry,
     sponsorship,
+    contributor,
 )
 
 Dictionary = dictionary.Dictionary
 DictionaryEntry = dictionary_entry.DictionaryEntry
 ProjectSponsorship = sponsorship.ProjectSponsorship
+ContributorInfo = contributor.ContributorInfo
 
 def generate_schema(ds: DataSession):
     ds.exec(dictionary.CREATE)
     ds.exec(dictionary_entry.CREATE)
     ds.exec(sponsorship.CREATE)
+    ds.exec(contributor.CREATE)
