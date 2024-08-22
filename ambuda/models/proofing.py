@@ -87,7 +87,6 @@ class Project(Base):
     genre_id = Column(Integer, ForeignKey("genres.id"), index=True)
 
     creator = relationship("User")
-    board = relationship("Board", cascade="delete")
     genre = relationship("Genre")
 
     #: An ordered list of pages belonging to this project.

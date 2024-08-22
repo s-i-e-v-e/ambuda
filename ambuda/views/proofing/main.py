@@ -130,7 +130,16 @@ def talk():
     projects = q.projects()
 
     # FIXME: optimize this once we have a higher thread volume.
-    all_threads = [(p, t) for p in projects for t in p.board.threads]
+    all_threads = []
+    from ambuda.repository import DataSession, Board, Thread
+    with DataSession() as ds:
+        for p in projects:
+            b = Board.select(ds, p.board_id)
+            assert b
+            xs = Thread.select_by_board(ds, b.id)
+            for x in xs:
+                all_threads.append((p, x))
+
     all_threads.sort(key=lambda x: x[1].updated_at, reverse=True)
 
     return render_template("proofing/talk.html", all_threads=all_threads)

@@ -46,6 +46,9 @@ from ambuda.repository import (
     sponsorship,
     contributor,
     blog,
+    talk_board,
+    talk_thread,
+    talk_post,
 )
 
 Dictionary = dictionary.Dictionary
@@ -53,6 +56,9 @@ DictionaryEntry = dictionary_entry.DictionaryEntry
 ProjectSponsorship = sponsorship.ProjectSponsorship
 ContributorInfo = contributor.ContributorInfo
 BlogPost = blog.BlogPost
+Board = talk_board.Board
+Thread = talk_thread.Thread
+Post = talk_post.Post
 
 def generate_schema(ds: DataSession):
     ds.exec(dictionary.CREATE)

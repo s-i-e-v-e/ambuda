@@ -125,44 +125,6 @@ def project(slug: str) -> db.Project | None:
     return session.query(db.Project).filter(db.Project.slug == slug).first()
 
 
-def thread(*, id: int) -> db.Thread | None:
-    session = get_session()
-    return session.query(db.Thread).filter_by(id=id).first()
-
-
-def post(*, id: int) -> db.Post | None:
-    session = get_session()
-    return session.query(db.Post).filter_by(id=id).first()
-
-
-def create_thread(*, board_id: int, user_id: int, title: str, content: str):
-    session = get_session()
-
-    assert board_id
-    thread = db.Thread(board_id=board_id, author_id=user_id, title=title)
-    session.add(thread)
-    session.flush()
-
-    post = db.Post(
-        board_id=board_id, author_id=user_id, thread_id=thread.id, content=content
-    )
-    session.add(post)
-    session.commit()
-
-
-def create_post(*, board_id: int, thread: db.Thread, user_id: int, content: str):
-    session = get_session()
-    post = db.Post(
-        board_id=board_id, author_id=user_id, thread_id=thread.id, content=content
-    )
-    session.add(post)
-    session.flush()
-
-    assert post.created_at
-    thread.updated_at = post.created_at
-    session.add(thread)
-    session.commit()
-
 
 def page(project_id, page_slug: str) -> db.Page | None:
     session = get_session()
