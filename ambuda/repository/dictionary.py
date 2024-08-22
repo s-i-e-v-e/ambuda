@@ -11,16 +11,16 @@ CREATE TABLE IF NOT EXISTS dictionaries (
 );
 """
 
-SELECT = """
-SELECT id, slug, title FROM dictionaries
-"""
-
 INSERT = """
 INSERT INTO dictionaries(slug, title) VALUES (?, ?);
 """
 
 DELETE = """
 DELETE FROM dictionaries WHERE slug = ?;
+"""
+
+SELECT = """
+SELECT id, slug, title FROM dictionaries
 """
 
 class Dictionary:
@@ -36,12 +36,18 @@ class Dictionary:
     #: Human-readable dictionary title.
     title: str
 
-    #entries = relationship("DictionaryEntry", backref="dictionary", cascade="delete")
-
     def __init__(self, id: int, slug: str, title: str):
         self.id = id
         self.slug = slug
         self.title = title
+
+    @staticmethod
+    def insert(ds: DataSession, slug: str, title: str):
+        ds.exec(INSERT, (slug, title))
+
+    @staticmethod
+    def delete(ds: DataSession, slug: str):
+        ds.exec(DELETE, (slug,))
 
     @staticmethod
     def __builder(xs):
@@ -56,7 +62,7 @@ class Dictionary:
         )).optional_head()
 
     @staticmethod
-    def select_by_id(ds: DataSession, id: int) -> "Optional[Dictionary]":
+    def select(ds: DataSession, id: int) -> "Optional[Dictionary]":
         return (ds.build(
             Dictionary.__builder,
             f"{SELECT} WHERE id = ?",
@@ -64,16 +70,8 @@ class Dictionary:
         )).optional_head()
 
     @staticmethod
-    def select_all(ds: DataSession) -> "List[Dictionary]":
+    def all(ds: DataSession) -> "List[Dictionary]":
         return (ds.build(
             Dictionary.__builder,
             SELECT,
         ))
-
-    @staticmethod
-    def insert(ds: DataSession, slug: str, title: str):
-        ds.exec(INSERT, (slug, title))
-
-    @staticmethod
-    def delete(ds: DataSession, slug: str):
-        ds.exec(DELETE, (slug,))

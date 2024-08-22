@@ -29,7 +29,7 @@ from ambuda.repository import DataSession, Dictionary, DictionaryEntry
 @functools.cache
 def __get_dictionary_data(ds: DataSession) -> dict[str, str]:
     return (Dictionary
-            .select_all(ds)
+            .all(ds)
             .map(lambda x: {x.slug: x.title})
             .dict())
 
@@ -64,7 +64,7 @@ def entries(ds: DataSession, sources: List[str], query: str) -> List[tuple[str, 
 
     keys = __create_query_keys(sources, query)
     return (Dictionary
-                  .select_all(ds)
+                  .all(ds)
                   .filter(lambda x: sources.has(x.slug))
                   .map(lambda x: __entries(x, keys))
             )

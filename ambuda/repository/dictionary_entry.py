@@ -12,16 +12,16 @@ CREATE TABLE IF NOT EXISTS dictionary_entries (
 );
 """
 
-SELECT = """
-SELECT id, dictionary_id, key, value FROM dictionary_entries
-"""
-
 INSERT = """
 INSERT INTO dictionary_entries(dictionary_id, key, value) VALUES(?, ?, ?);
 """
 
 DELETE = """
 DELETE FROM dictionary_entries WHERE dictionary_id = ?;
+"""
+
+SELECT = """
+SELECT id, dictionary_id, key, value FROM dictionary_entries
 """
 
 class DictionaryEntry:
@@ -41,6 +41,14 @@ class DictionaryEntry:
     value: str
 
     @staticmethod
+    def insert(ds: DataSession, dictionary_id: int, key: str, value: str):
+        ds.exec(INSERT, (dictionary_id, key, value))
+
+    @staticmethod
+    def delete_all(ds: DataSession, dictionary_id: int):
+        ds.exec(DELETE, (dictionary_id,))
+
+    @staticmethod
     def __builder(xs):
         return DictionaryEntry(xs[0], xs[1], xs[2], xs[3])
 
@@ -58,11 +66,5 @@ class DictionaryEntry:
             (dictionary_id, key))
         )
 
-    @staticmethod
-    def insert(ds: DataSession, dictionary_id: int, key: str, value: str):
-        ds.exec(INSERT, (dictionary_id, key, value))
 
-    @staticmethod
-    def delete_all(ds: DataSession, dictionary_id: int):
-        ds.exec(DELETE, (dictionary_id,))
 

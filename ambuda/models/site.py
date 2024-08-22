@@ -11,22 +11,7 @@ from sqlalchemy import Text as Text_
 from ambuda.models.base import Base, pk
 
 
-class ProjectSponsorship(Base):
 
-    """A project that a donor can sponsor."""
-
-    __tablename__ = "site_project_sponsorship"
-
-    #: Primary key.
-    id = pk()
-    #: Sanskrit title.
-    sa_title = Column(String, nullable=False)
-    #: English title.
-    en_title = Column(String, nullable=False)
-    #: A short description of this project.
-    description = Column(Text_, nullable=False)
-    #: The estimated cost of this project in Indian rupees (INR).
-    cost_inr = Column(Integer, nullable=False)
 
 
 class ContributorInfo(Base):

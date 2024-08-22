@@ -36,12 +36,15 @@ class DataSession:
 
 from ambuda.repository import (
     dictionary,
-    dictionary_entry
+    dictionary_entry,
+    sponsorship,
 )
 
 Dictionary = dictionary.Dictionary
 DictionaryEntry = dictionary_entry.DictionaryEntry
+ProjectSponsorship = sponsorship.ProjectSponsorship
 
 def generate_schema(ds: DataSession):
     ds.exec(dictionary.CREATE)
     ds.exec(dictionary_entry.CREATE)
+    ds.exec(sponsorship.CREATE)

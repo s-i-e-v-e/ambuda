@@ -1,8 +1,8 @@
-"""Views for basic site pages."""
+"""
+Views for basic site pages.
+"""
 
 from flask import Blueprint, redirect, render_template, session, url_for
-
-from ambuda import queries as q
 from ambuda.consts import LOCALES
 
 bp = Blueprint("site", __name__)
@@ -30,8 +30,11 @@ def donate_for_project(title, cost):
 
 @bp.route("/sponsor")
 def sponsor():
-    sponsorships = q.project_sponsorships()
-    return render_template("site/sponsor.html", sponsorships=sponsorships)
+    from ambuda.repository import DataSession, ProjectSponsorship
+    with DataSession() as ds:
+        sponsorships = ProjectSponsorship.all(ds)
+        sponsorships = sorted(sponsorships, key=lambda x: x.sa_title or x.en_title)
+        return render_template("site/sponsor.html", sponsorships=sponsorships)
 
 
 @bp.route("/support")
