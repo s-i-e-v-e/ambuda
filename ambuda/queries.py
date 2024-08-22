@@ -200,18 +200,6 @@ def create_user(*, username: str, email: str, raw_password: str) -> db.User:
     return user
 
 
-def blog_post(slug: str) -> db.BlogPost | None:
-    """Fetch the given blog post."""
-    session = get_session()
-    return session.query(db.BlogPost).filter_by(slug=slug).first()
-
-
-def blog_posts() -> list[db.BlogPost]:
-    """Fetch all blog posts."""
-    session = get_session()
-    return session.query(db.BlogPost).order_by(db.BlogPost.created_at.desc()).all()
-
-
 def genres() -> list[db.Genre]:
     session = get_session()
     return session.query(db.Genre).all()

@@ -1,4 +1,4 @@
 #/bin/bash
 source /ambuda/.venv/bin/activate
-pip install flask flask_babel flask_admin flask_login flask_mail flask_wtf py-dateutil sentry_sdk sqlalchemy wtforms wtforms_sqlalchemy toml indic_transliteration requests slugify google-cloud-vision
+pip install flask flask_babel flask_admin flask_login flask_mail flask_wtf py-dateutil sentry_sdk sqlalchemy wtforms wtforms_sqlalchemy toml indic_transliteration requests python-slugify google-cloud-vision linkify-it-py
 flask run -h 127.0.0.1 -p 5000

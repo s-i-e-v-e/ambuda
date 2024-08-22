@@ -45,15 +45,18 @@ from ambuda.repository import (
     dictionary_entry,
     sponsorship,
     contributor,
+    blog,
 )
 
 Dictionary = dictionary.Dictionary
 DictionaryEntry = dictionary_entry.DictionaryEntry
 ProjectSponsorship = sponsorship.ProjectSponsorship
 ContributorInfo = contributor.ContributorInfo
+BlogPost = blog.BlogPost
 
 def generate_schema(ds: DataSession):
     ds.exec(dictionary.CREATE)
     ds.exec(dictionary_entry.CREATE)
     ds.exec(sponsorship.CREATE)
     ds.exec(contributor.CREATE)
+    ds.exec(blog.CREATE)
