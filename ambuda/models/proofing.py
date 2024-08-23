@@ -86,7 +86,7 @@ class Project(Base):
     #: The genre of this project.
     genre_id = Column(Integer, ForeignKey("genres.id"), index=True)
 
-    creator = relationship("User")
+    #todo: creator = relationship("User")
     genre = relationship("Genre")
 
     #: An ordered list of pages belonging to this project.
@@ -186,7 +186,7 @@ class Revision(Base):
     content = Column(Text_, nullable=False)
 
     #: An ordered list of revisions for this page (newest first).
-    author = relationship("User", backref="revisions")
+    #todo: author = relationship("User", backref="revisions")
     #: The project this revision belongs to.
     project = relationship("Project")
     #: The status of this page.

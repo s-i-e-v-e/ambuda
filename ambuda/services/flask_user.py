@@ -1,25 +1,23 @@
-"""Manages the auth/authentication data flow."""
-
+"""
+Manages the auth/authentication data flow.
+"""
 from http import HTTPStatus
-
 from flask import abort, redirect, request, url_for
 from flask_login import LoginManager
 
-from ambuda.database import User
-from ambuda.queries import get_session
-from ambuda.utils.user_mixins import AmbudaAnonymousUser
+from ambuda.services import DataSession, AmbudaUser, AmbudaAnonymousUser, UserService
 
 
-def _load_user(user_id: int) -> User | None:
+
+def _load_user(user_id: int) -> AmbudaUser | None:
     """Load a user from the database.
 
     Flask-Login uses this function to populate the `current_user` variable.
     This variable is made available both by direct import (`from flask_login
     import current_user`) and as a template variable injected into each template.
     """
-    session = get_session()
-    user = session.query(User).get(int(user_id))
-    return user if user and user.is_ok else None
+    with DataSession() as ds:
+        return UserService.get(ds, user_id)
 
 
 def _unauthorized():

@@ -135,33 +135,6 @@ def page(project_id, page_slug: str) -> db.Page | None:
     )
 
 
-def user(username: str) -> db.User | None:
-    session = get_session()
-    return (
-        session.query(db.User)
-        .filter_by(username=username, is_deleted=False, is_banned=False)
-        .first()
-    )
-
-
-def create_user(*, username: str, email: str, raw_password: str) -> db.User:
-    session = get_session()
-    user = db.User(username=username, email=email)
-    user.set_password(raw_password)
-    session.add(user)
-    session.flush()
-
-    # Allow all users to be proofreaders
-    proofreader_role = (
-        session.query(db.Role).filter_by(name=db.SiteRole.P1.value).first()
-    )
-    user_role = db.UserRoles(user_id=user.id, role_id=proofreader_role.id)
-    session.add(user_role)
-
-    session.commit()
-    return user
-
-
 def genres() -> list[db.Genre]:
     session = get_session()
     return session.query(db.Genre).all()

@@ -1,21 +1,48 @@
-from unstd.data import Optional
+from datetime import datetime
 
-from ambuda.repository import DataSession, user
+from unstd.data import List, Optional
+from ambuda.repository import DataSession
 
+CREATE = """
+CREATE TABLE IF NOT EXISTS roles (
+	id INTEGER NOT NULL, 
+	name VARCHAR NOT NULL, 
+	created_at DATETIME NOT NULL, 
+	PRIMARY KEY (id), 
+	UNIQUE (name)
+);
+"""
 
-def get(user_name: str) -> Optional[int]:
-    with DataSession() as ds:
-        return ds.exec("SELECT id FROM roles WHERE name = ?", (user_name,)).map(lambda xs: xs[0]).optional_head()
+INSERT = """
+INSERT INTO roles(name, created_at) VALUES(?, ?);
+"""
 
+DELETE = """
+DELETE FROM roles WHERE id = ?;
+"""
 
-def add(user_name: str, user_role: str) -> None:
-    user_id = user.get(user_name)
-    if not user_id:
-        raise ValueError(f"User '{user_name}' does not exist")
+SELECT = """
+SELECT id, name, created_at FROM roles
+"""
 
-    role_id = get(user_role)
-    if not role_id:
-        raise ValueError(f"Role '{user_role}' does not exist")
+class Role:
+    """
+    A role.
 
-    with DataSession() as ds:
-        ds.exec("INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)", (user_id, role_id))
+    Roles are how we model fine-grained permissions on Ambuda.
+    """
+
+    #: Primary key.
+    id: int
+    #: Name of the role.
+    name: str
+    #: When this role was defined.
+    created_at: datetime
+
+    def __repr__(self):
+        return f"<Role({self.id}, {self.name!r})>"
+
+    def __init__(self, id: int, name: str, created_at: datetime):
+        self.id = id
+        self.name = name
+        self.created_at = created_at

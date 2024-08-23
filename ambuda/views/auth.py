@@ -14,9 +14,8 @@ Max lengths:
 
 """
 
-import secrets
 import sys
-from datetime import datetime, timedelta
+import typing
 
 from flask import Blueprint, flash, redirect, render_template, url_for
 from flask_babel import lazy_gettext as _l
@@ -25,9 +24,8 @@ from flask_wtf import FlaskForm, RecaptchaField
 from wtforms import EmailField, PasswordField, StringField
 from wtforms import validators as val
 
-import ambuda.queries as q
-from ambuda import database as db
 from ambuda import mail
+from ambuda.services import DataSession, UserService, User
 
 bp = Blueprint("auth", __name__)
 
@@ -39,57 +37,9 @@ MAX_PASSWORD_LEN = 256
 MIN_USERNAME_LEN = 6
 MAX_USERNAME_LEN = 64
 
-# token lifetime
-MAX_TOKEN_LIFESPAN_IN_HOURS = 24
+
 # FIXME: redirect to site.index once user accounts are more useful.
 POST_AUTH_ROUTE = "proofing.index"
-
-
-def _create_reset_token(user_id) -> str:
-    raw_token = secrets.token_urlsafe()
-
-    session = q.get_session()
-    record = db.PasswordResetToken(user_id=user_id, is_active=True)
-    record.set_token(raw_token)
-    session.add(record)
-    session.commit()
-
-    return raw_token
-
-
-def _get_reset_token_for_user(user_id: int) -> db.PasswordResetToken | None:
-    # User might have requested multiple tokens -- get the latest one.
-    session = q.get_session()
-    return (
-        session.query(db.PasswordResetToken)
-        .filter_by(user_id=user_id, is_active=True)
-        .order_by(db.PasswordResetToken.created_at.desc())
-        .first()
-    )
-
-
-def _is_valid_reset_token(row: db.PasswordResetToken, raw_token: str, now=None):
-    now = now or datetime.utcnow()
-
-    # No token for user
-    if not row:
-        return False
-
-    # Deactivated
-    if not row.is_active:
-        return False
-
-    # Token too old
-    max_age = timedelta(hours=MAX_TOKEN_LIFESPAN_IN_HOURS)
-    if row.created_at + max_age <= now:
-        return False
-
-    # Token mismatch
-    if not row.check_token(raw_token):
-        return False
-
-    return True
-
 
 # The native val.Length() validator silently snips username and
 # password to the maximum length.
@@ -158,16 +108,17 @@ class SignupForm(FlaskForm):
 
     def validate_username(self, username):
         # TODO: make username case insensitive
-        user = q.user(username.data)
-        if user:
-            raise val.ValidationError("Please use a different username.")
+        with DataSession() as ds:
+            user = UserService.get_by_name(ds, username.data, validate=False)
+            if user:
+                raise val.ValidationError("Please use a different username.")
 
     def validate_email(self, email):
-        session = q.get_session()
         # TODO: make email case insensitive
-        user = session.query(db.User).filter_by(email=email.data).first()
-        if user:
-            raise val.ValidationError("Please use a different email address.")
+        with DataSession() as ds:
+            user = UserService.get_by_email(ds, email.data, validate=False)
+            if user:
+                raise val.ValidationError("Please use a different email address.")
 
 
 class SignInForm(FlaskForm):
@@ -203,13 +154,16 @@ def register():
     form = SignupForm()
     # save username and email in lowercase
     if form.validate_on_submit():
-        user = q.create_user(
-            username=form.username.data,
-            email=form.email.data,
-            raw_password=form.password.data,
-        )
-        login_user(user, remember=True)
-        return redirect(url_for(POST_AUTH_ROUTE))
+        with DataSession() as ds:
+            user = UserService.create_user(
+                ds,
+                username=form.username.data,
+                email=form.email.data,
+                raw_password=form.password.data,
+                description=""
+            )
+            login_user(user, remember=True)
+            return redirect(url_for(POST_AUTH_ROUTE))
     else:
         # Override the default message ("The response parameter is missing.")
         # for better UX.
@@ -228,20 +182,23 @@ def sign_in():
     form = SignInForm()
     # TODO: make username case insensitive
     if form.validate_on_submit():
-        user = q.user(form.username.data)
-        if user and user.check_password(form.password.data):
-            login_user(user, remember=True)
-            return redirect(url_for(POST_AUTH_ROUTE))
-        else:
-            flash("Invalid username or password.")
+        with DataSession() as ds:
+            user = UserService.get_by_name(ds, form.username.data)
+            if user and UserService.password_is_valid(ds, user, form.password.data):
+                login_user(user, remember=True)
+                return redirect(url_for(POST_AUTH_ROUTE))
+            else:
+                flash("Invalid username or password.")
     return render_template("auth/sign-in.html", form=form)
 
 
 def logout_if_not_ok():
     # Check if user is now deleted or banned
-    user = q.user(username=current_user.username)
-    if user and not user.is_ok:
-        logout_user()
+    with DataSession() as ds:
+        user = UserService.get_by_name(ds, current_user.username, validate=False)
+        validated_user = UserService.get_by_name(ds, current_user.username)
+        if user and not validated_user:
+            logout_user()
 
 
 @bp.route("/sign-out")
@@ -256,18 +213,18 @@ def get_reset_password_token():
     form = ResetPasswordForm()
     if form.validate_on_submit():
         email = form.email.data
-        session = q.get_session()
-        user = session.query(db.User).filter_by(email=email).first()
-        if user:
-            raw_token = _create_reset_token(user.id)
-            mail.send_reset_password_link(
-                username=user.username, email=user.email, raw_token=raw_token
-            )
-            return render_template("auth/reset-password-post.html", email=user.email)
-        else:
-            flash(
-                "Sorry, the email address you provided is not associated with any of our acounts."
-            )
+        with DataSession() as ds:
+            user = UserService.get_by_email(ds, email)
+            if user:
+                raw_token = UserService.create_reset_token(ds, user.id)
+                mail.send_reset_password_link(
+                    username=user.username, email=user.email, raw_token=raw_token
+                )
+                return render_template("auth/reset-password-post.html", email=user.email)
+            else:
+                flash(
+                    "Sorry, the email address you provided is not associated with any of our acounts."
+                )
 
     # Override the default message ("The response parameter is missing.")
     # for better UX.
@@ -278,44 +235,38 @@ def get_reset_password_token():
 
 
 @bp.route("/reset-password/<username>/<raw_token>", methods=["GET", "POST"])
-def reset_password_from_token(username, raw_token):
+def reset_password_from_token(username: str, raw_token: str):
     """Reset password after the user clicks a reset link."""
     msg_invalid = "Sorry, this reset password link isn't valid. Please try again."
 
-    user = q.user(username)
-    if user is None:
-        flash(msg_invalid)
-        return redirect(url_for("auth.get_reset_password_token"))
+    with DataSession() as ds:
+        user = UserService.get_by_name(ds, username)
+        if user is None:
+            flash(msg_invalid)
+            return redirect(url_for("auth.get_reset_password_token"))
 
-    token = _get_reset_token_for_user(user.id)
-    if not _is_valid_reset_token(token, raw_token):
-        flash(msg_invalid)
-        return redirect(url_for("auth.get_reset_password_token"))
 
-    form = ResetPasswordFromTokenForm()
-    if form.validate_on_submit():
-        has_password_match = form.password.data == form.confirm_password.data
-        if has_password_match:
-            user.set_password(form.password.data)
-            token.is_active = False
-            token.used_at = datetime.now()
+        validated = UserService.validate_reset_token(ds, user.id, raw_token)
+        if not validated:
+            flash(msg_invalid)
+            return redirect(url_for("auth.get_reset_password_token"))
 
-            session = q.get_session()
-            session.add(user)
-            session.add(token)
-            session.commit()
+        form = ResetPasswordFromTokenForm()
+        if form.validate_on_submit():
+            has_password_match = form.password.data == form.confirm_password.data
+            if has_password_match:
+                UserService.set_password(ds, user, form.password.data)
 
-            # Expire any existing sessions.
-            logout_user()
-            flash("Successfully reset password!", "success")
-            mail.send_confirm_reset_password(
-                username=user.username,
-                email=user.email,
-            )
-            return redirect(url_for("auth.sign_in"))
-
-        if not has_password_match:
-            form.password.errors.append("Passwords must match.")
+                # Expire any existing sessions.
+                logout_user()
+                flash("Successfully reset password!", "success")
+                mail.send_confirm_reset_password(
+                    username=user.username,
+                    email=user.email,
+                )
+                return redirect(url_for("auth.sign_in"))
+            else:
+                form.password.errors.append("Passwords must match.")
 
     return render_template(
         "auth/reset-password-from-token.html", username=user.username, form=form
@@ -329,17 +280,13 @@ def change_password():
     if not form.validate_on_submit():
         return render_template("auth/change-password.html", form=form)
 
-    if current_user.check_password(form.old_password.data):
-        session = q.get_session()
-        current_user.set_password(form.new_password.data)
-        session.add(current_user)
-        session.commit()
-
-        flash("Changed password successfully!", "success")
-        return redirect(
-            url_for("proofing.user.summary", username=current_user.username)
-        )
-    else:
-        flash("Old password isn't valid.")
+    with DataSession() as ds:
+        if UserService.update_password(ds, typing.cast(User, current_user), form.old_password.data, form.new_password.data):
+            flash("Changed password successfully!", "success")
+            return redirect(
+                url_for("proofing.user.summary", username=current_user.username)
+            )
+        else:
+            flash("Old password isn't valid.")
 
     return render_template("auth/change-password.html", form=form)

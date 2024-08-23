@@ -117,7 +117,9 @@ def _make_role_form(roles, user_):
 @bp.route("/<username>/admin", methods=["GET", "POST"])
 @moderator_required
 def admin(username):
-    """Adjust a user's roles."""
+    """
+    Adjust a user's roles.
+    """
     user_ = q.user(username)
     if not user_:
         abort(404)

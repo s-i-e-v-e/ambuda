@@ -101,11 +101,11 @@ def create_admin_manager(app):
     )
 
     #todo: admin.add_view(DictionaryView(db.Dictionary, session))
-    admin.add_view(ProjectView(db.Project, session))
-    admin.add_view(TextBlockView(db.TextBlock, session))
-    admin.add_view(TextView(db.Text, session))
-    admin.add_view(UserView(db.User, session))
-    admin.add_view(GenreView(db.Genre, session))
+    #todo: admin.add_view(ProjectView(db.Project, session))
+    #todo: admin.add_view(TextBlockView(db.TextBlock, session))
+    #todo: admin.add_view(TextView(db.Text, session))
+    #todo: admin.add_view(UserView(db.User, session))
+    #todo: admin.add_view(GenreView(db.Genre, session))
     #todo: admin.add_view(SponsorshipView(db.ProjectSponsorship, session))
     #todo: admin.add_view(ContributorInfoView(db.ContributorInfo, session))
 

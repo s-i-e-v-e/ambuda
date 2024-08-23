@@ -65,6 +65,3 @@ class DictionaryEntry:
             f"{SELECT} WHERE dictionary_id = ? AND key = ?",
             (dictionary_id, key))
         )
-
-
-

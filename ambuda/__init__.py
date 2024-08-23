@@ -16,7 +16,7 @@ from sqlalchemy import exc
 
 from unstd import config
 from ambuda import admin as admin_manager
-from ambuda import auth as auth_manager
+from ambuda.services import flask_user as auth_manager
 from ambuda import checks, filters, queries
 from ambuda.consts import LOCALES
 from ambuda.mail import mailer
@@ -108,8 +108,8 @@ def create_app():
     app.config.from_object(config_spec)
 
     # init direct database
-    import ambuda.repository
-    ambuda.repository.set_database_file(config_spec.DATABASE_FILE)
+    from ambuda.repository import DataSession
+    DataSession.set_database_file(config_spec.DATABASE_FILE)
 
     # Sanity checks
     if not config_spec.is_testing:
