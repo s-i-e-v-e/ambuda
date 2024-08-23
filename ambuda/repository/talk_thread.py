@@ -16,20 +16,20 @@ CREATE TABLE IF NOT EXISTS discussion_threads (
 );
 """
 
-UPDATE = """
-UPDATE discussion_threads SET title = ?, board_id = ?, author_id = ?, updated_at = ?, WHERE id = ?;
-"""
-
-INSERT = """
-INSERT INTO discussion_threads(title, board_id, author_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?) RETURNING id;
+SELECT = """
+SELECT id, title, board_id, author_id, created_at, updated_at FROM discussion_threads
 """
 
 DELETE = """
 DELETE FROM discussion_threads WHERE id = ?;
 """
 
-SELECT = """
-SELECT id, title, board_id, author_id, created_at, updated_at FROM discussion_threads
+INSERT = """
+INSERT INTO discussion_threads(title, board_id, author_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?) RETURNING id;
+"""
+
+UPDATE = """
+UPDATE discussion_threads SET title = ?, board_id = ?, author_id = ?, updated_at = ?, WHERE id = ?;
 """
 
 #: Threads, newest first.
@@ -64,16 +64,16 @@ class Thread:
         self.updated_at = updated_at
 
     @staticmethod
-    def update(ds: DataSession, x: "Thread", time: datetime):
-        ds.exec(UPDATE, (x.title, x.board_id, x.author_id, time, x.id))
+    def delete(ds: DataSession, id: int):
+        ds.exec(DELETE, (id,))
 
     @staticmethod
     def insert(ds: DataSession, title: str, board_id: int, author_id: int, time: datetime):
         return ds.exec(INSERT, (title, board_id, author_id, time, time)).head()[0]
 
     @staticmethod
-    def delete(ds: DataSession, id: int):
-        ds.exec(DELETE, (id,))
+    def update(ds: DataSession, id: int, title: str, board_id: int, author_id: int, time: datetime):
+        ds.exec(UPDATE, (title, board_id, author_id, time, id))
 
     @staticmethod
     def __builder(xs):

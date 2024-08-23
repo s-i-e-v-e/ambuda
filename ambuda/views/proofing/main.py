@@ -7,9 +7,8 @@ from sqlalchemy import orm
 from ambuda import consts
 from ambuda import database as db
 from ambuda import queries as q
-from ambuda.enums import SitePageStatus
+from ambuda.services import SitePageStatus
 from ambuda.views.proofing.decorators import moderator_required
-
 
 bp = Blueprint("proofing", __name__)
 
@@ -154,8 +153,10 @@ def dashboard():
     days_ago_1d = now - timedelta(days=1)
 
     session = q.get_session()
-    bot = session.query(db.User).filter_by(username=consts.BOT_USERNAME).one()
-    bot_id = bot.id
+    from ambuda.services import DataSession, UserService
+    with DataSession() as ds:
+        bot = UserService.get_bot(ds)
+        bot_id = 0 if not bot else bot.id
 
     revisions_30d = (
         session.query(db.Revision)

@@ -58,8 +58,8 @@ def create_from_scratch(engine, slug: str, title: str, generator):
         # Delete existing dictionary and all of its entries.
         d = Dictionary.select_by_slug(ds, slug)
         if d:
-            DictionaryEntry.delete_all(ds, d.id)
-            Dictionary.delete(ds, d.slug)
+            DictionaryEntry.delete_by_dictionary(ds, d.id)
+            Dictionary.delete_by_slug(ds, d.slug)
 
         # Create a new dictionary
         Dictionary.insert(ds, slug, title)

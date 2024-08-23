@@ -11,16 +11,16 @@ CREATE TABLE IF NOT EXISTS user_roles (
 );
 """
 
-INSERT = """
-INSERT INTO user_roles(user_id, role_id) VALUES(?, ?);
-"""
-
-DELETE = """
+DELETE_BY_USER = """
 DELETE FROM user_roles WHERE user_id = ?;
 """
 
 SELECT = """
 SELECT user_id, role_id FROM user_roles
+"""
+
+INSERT = """
+INSERT INTO user_roles(user_id, role_id) VALUES(?, ?);
 """
 
 class UserRoles:
@@ -38,19 +38,19 @@ class UserRoles:
         self.role_id = role_id
 
     @staticmethod
-    def insert(ds: DataSession, user_id: int, role_id: int):
-        ds.exec(INSERT, (user_id, role_id))
+    def delete_by_user(ds: DataSession, user_id: int):
+        ds.exec(DELETE_BY_USER, (user_id,))
 
     @staticmethod
-    def delete_all(ds: DataSession, user_id: int):
-        ds.exec(DELETE, (user_id,))
+    def insert(ds: DataSession, user_id: int, role_id: int):
+        ds.exec(INSERT, (user_id, role_id))
 
     @staticmethod
     def __builder(xs):
         return UserRoles(xs[0], xs[1])
 
     @staticmethod
-    def select(ds: DataSession, user_id: int) -> "List[UserRoles]":
+    def select_by_user(ds: DataSession, user_id: int) -> "List[UserRoles]":
         return (ds.build(
             UserRoles.__builder,
             f"{SELECT} WHERE user_id = ?",

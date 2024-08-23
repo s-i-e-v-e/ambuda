@@ -7,7 +7,7 @@ sense to check into version control.
 Notes on i18n: Generally, this interface is for admins and moderators, so the
 `gettext` annotations here are quite lax.
 """
-
+from datetime import datetime
 from flask import Blueprint, abort, flash, redirect, render_template, url_for
 from flask_babel import lazy_gettext as _l
 from flask_login import current_user
@@ -80,6 +80,7 @@ def create_post():
                 slug=slug,
                 content=content,
                 author_id=current_user.id,
+                time=datetime.now(),
             )
 
         flash(_l("Created post."), "success")
@@ -104,7 +105,7 @@ def edit_post(slug):
     if form.validate_on_submit():
         form.populate_obj(post)
         with DataSession() as ds:
-            BlogPost.update(ds, post)
+            BlogPost.update(ds, **post.__dict__)
 
         flash(_l("Edited post."), "success")
         return redirect(url_for("blog.index"))

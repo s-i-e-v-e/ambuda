@@ -45,6 +45,8 @@ class DataSession:
 
 
 from ambuda.repository import (
+    defined_role,
+    defined_page_status,
     dictionary,
     dictionary_entry,
     sponsorship,
@@ -58,6 +60,9 @@ from ambuda.repository import (
     user_role,
     user_password_reset
 )
+
+SiteRole = defined_role.SiteRole
+SitePageStatus = defined_page_status.SitePageStatus
 
 Dictionary = dictionary.Dictionary
 DictionaryEntry = dictionary_entry.DictionaryEntry

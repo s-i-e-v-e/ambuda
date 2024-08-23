@@ -19,6 +19,10 @@ CREATE TABLE IF NOT EXISTS users (
 );
 """
 
+SELECT = """
+SELECT id, username, password_hash, email, description, is_deleted, is_banned, is_verified FROM users
+"""
+
 UPDATE = """
 UPDATE users SET
 username = ?,
@@ -32,11 +36,7 @@ WHERE id = ?;
 """
 
 INSERT = """
-INSERT INTO users(username, password_hash, email, created_at, description, is_deleted, is_banned, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-"""
-
-SELECT = """
-SELECT id, username, password_hash, email, description, is_deleted, is_banned, is_verified FROM users
+INSERT INTO users(username, password_hash, email, created_at, description, is_deleted, is_banned, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id;
 """
 
 # AmbudaUserMixin
@@ -88,18 +88,14 @@ class User:
         self.is_banned = is_banned
         self.is_verified = is_verified
 
-
-    @staticmethod
-    def update(ds: DataSession, x: "User"):
-        ds.exec(UPDATE, (x.username, x.password_hash, x.email, x.description, x.is_deleted, x.is_banned, x.is_verified, x.id))
-
     @staticmethod
     def insert(ds: DataSession, username: str, password_hash: str, email: str, description: str):
-        ds.exec(INSERT, (username, password_hash, email, datetime.utcnow(), description, False, False, False))
+        return ds.exec(INSERT, (username, password_hash, email, datetime.utcnow(), description, False, False, False)).head()[0]
 
     @staticmethod
-    def delete(ds: DataSession, id: int):
-        ds.exec(DELETE, (id,))
+    def update(ds: DataSession, id: int, username: str, password_hash: str, email: str, description: str, is_deleted: bool, is_banned: bool, is_verified: bool):
+        ds.exec(UPDATE, (username, password_hash, email, description, is_deleted, is_banned, is_verified, id))
+
 
     @staticmethod
     def __builder(xs):

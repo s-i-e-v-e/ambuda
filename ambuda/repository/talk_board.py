@@ -9,16 +9,16 @@ CREATE TABLE IF NOT EXISTS discussion_boards (
 );
 """
 
-INSERT = """
-INSERT INTO discussion_boards(title) VALUES (?);
+SELECT = """
+SELECT id, title FROM discussion_boards
 """
 
 DELETE = """
 DELETE FROM discussion_boards WHERE id = ?;
 """
 
-SELECT = """
-SELECT id, title FROM discussion_boards
+INSERT = """
+INSERT INTO discussion_boards(title) VALUES (?);
 """
 
 class Board:
@@ -35,12 +35,12 @@ class Board:
         self.title = title
 
     @staticmethod
-    def insert(ds: DataSession, id: int, title: str):
-        ds.exec(INSERT, (id, title))
-
-    @staticmethod
     def delete(ds: DataSession, id: int):
         ds.exec(DELETE, (id,))
+
+    @staticmethod
+    def insert(ds: DataSession, id: int, title: str):
+        ds.exec(INSERT, (id, title))
 
     @staticmethod
     def __builder(xs):

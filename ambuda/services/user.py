@@ -1,10 +1,13 @@
 from datetime import datetime, timedelta
 
-from ambuda.repository import DataSession, PasswordResetToken, User
+from ambuda.repository import DataSession, PasswordResetToken, User, Role, SiteRole
 from werkzeug.security import generate_password_hash, check_password_hash
+
+from repository.user_role import UserRoles
 from unstd.data import List, Optional
 
-from ambuda.enums import SiteRole
+BOT_USER = "ambuda-bot"
+BOT_EMAIL = "bot@ambuda.org"
 
 class AmbudaAnonymousUser:
     """
@@ -57,11 +60,13 @@ class AmbudaUser(User):
         super().__init__(**user.__dict__)
 
     def has_role(self, role: SiteRole) -> bool:
-        return role.value in {r.name for r in self.roles}
+        return self.has_any_role([role])
 
     def has_any_role(self, roles: list[SiteRole]) -> bool:
-        user_roles = {r.name for r in self.roles}
-        return any(r.value in user_roles for r in roles)
+        with DataSession() as ds:
+            xs = Role.all(ds)
+            ys = UserRoles.select_by_user(ds, self.id).map(lambda x: xs.filter(lambda y: x.role_id == y.id).head().name)
+            return ys.filter(lambda x: List(roles).filter(lambda y:  x == y.value).is_not_empty()).is_not_empty()
 
     @property
     def is_p1(self) -> bool:
@@ -125,13 +130,23 @@ class UserService:
         return UserService.__get_valid(user) if validate else user
 
     @staticmethod
+    def get_bot(ds: DataSession) -> Optional[AmbudaUser]:
+        return UserService.get_by_name(ds, BOT_USER)
+
+    @staticmethod
+    def create_bot(ds: DataSession, password: str):
+        user = UserService.get_by_name(ds, BOT_USER)
+        if not user:
+            UserService.create_user(ds, BOT_USER, BOT_EMAIL, password, "Bot")
+
+    @staticmethod
     def password_is_valid(ds: DataSession, user: User, raw_password: str):
         return check_password_hash(user.password_hash, raw_password)
 
     @staticmethod
     def set_password(ds: DataSession, user: User, raw_password: str):
         user.password_hash = generate_password_hash(raw_password)
-        User.update(ds, user)
+        User.update(ds, **user.__dict__)
 
     @staticmethod
     def update_password(ds: DataSession, user: User, old_raw_password: str, new_raw_password: str) -> bool:
@@ -142,16 +157,22 @@ class UserService:
         return True
 
     @staticmethod
-    def create_user(ds: DataSession, username: str, email: str, raw_password: str, description: str) -> User:
-        User.insert(ds, username, email, generate_password_hash(raw_password), description)
+    def update_description(ds: DataSession, user: User):
+        u = User.select(ds, user.id)
+        if u:
+            u.description = user.description = user.description
+            User.update(ds, **u.__dict__)
 
+    @staticmethod
+    def create_user(ds: DataSession, username: str, email: str, raw_password: str, description: str) -> Optional[AmbudaUser]:
+        user_id = User.insert(ds, username, email, generate_password_hash(raw_password), description)
+        user = UserService.get(ds, user_id)
+        user = UserService.__get_valid(user)
 
         # Allow all users to be proofreaders
-        proofreader_role = (
-            session.query(db.Role).filter_by(name=db.SiteRole.P1.value).first()
-        )
-        user_role = db.UserRoles(user_id=user.id, role_id=proofreader_role.id)
-        session.add(user_role)
+        p1 = Role.all(ds).filter(lambda x: x.name == SiteRole.P1.value).head()
+
+        UserRoles.insert(ds, user_id, p1.id)
 
         return user
 
@@ -172,51 +193,7 @@ class UserService:
     # def exists(ds: DataSession, name: str, email: str) -> bool:
     #     return ds.exec("SELECT 1 FROM users WHERE username = ? OR email = ?", (name, email)).is_not_empty()
     #
-    #
-    #
-    # @staticmethod
-    # def add_user(ds: DataSession, name: str, password: str, email: str) -> None:
-    #     if UserService.exists(ds, name, email):
-    #         raise ValueError(f"User with name '{name}' or email '{email}' already exists")
-    #
-    #     hash = generate_password_hash(password)
-    #     with DataSession() as ds:
-    #         ds.exec(
-    #             "INSERT INTO users (username, email, password_hash, is_verified, is_deleted, is_banned, created_at, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    #             (name, email, hash, False, False, False, datetime.now(), "")
-    #             )
-    #
-    # # role
-    # def get_role(user_name: str) -> Optional[int]:
-    #     with DataSession() as ds:
-    #         return ds.exec("SELECT id FROM roles WHERE name = ?", (user_name,)).map(lambda xs: xs[0]).optional_head()
-    #
-    # def add_role(user_name: str, user_role: str) -> None:
-    #     user_id = user.get(user_name)
-    #     if not user_id:
-    #         raise ValueError(f"User '{user_name}' does not exist")
-    #
-    #     role_id = get(user_role)
-    #     if not role_id:
-    #         raise ValueError(f"Role '{user_role}' does not exist")
-    #
-    #     with DataSession() as ds:
-    #         ds.exec("INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)", (user_id, role_id))
-    #
-    # # ambuda.queries
-    # def user(username: str) -> db.User | None:
-    #     session = get_session()
-    #     return (
-    #         session.query(db.User)
-    #         .filter_by(username=username, is_deleted=False, is_banned=False)
-    #         .first()
-    #     )
-    #
 
-    #
-
-    # ------------------------------------
-    #
     @staticmethod
     def create_reset_token(ds: DataSession, user_id: int) -> str:
         import secrets
@@ -249,7 +226,21 @@ class UserService:
         if not check_password_hash(token.token_hash, raw_token):
             return False
 
-        token.is_active = False
-        token.used_at = time
-        PasswordResetToken.update(ds, token)
+        PasswordResetToken.update(ds, token.id, time)
         return True
+
+    @staticmethod
+    def roles(ds: DataSession) -> List[Role]:
+        return Role.all(ds)
+
+    @staticmethod
+    def roles_by_user(ds: DataSession, user: AmbudaUser) -> List[int]:
+        return UserRoles.select_by_user(ds, user.id).map(lambda x: x.role_id)
+
+    @staticmethod
+    def delete_roles_by_user(ds: DataSession, user: AmbudaUser):
+        UserRoles.delete_by_user(ds, user.id)
+
+    @staticmethod
+    def add_role(ds: DataSession, user: AmbudaUser, r: Role):
+        UserRoles.insert(ds, user.id, r.id)

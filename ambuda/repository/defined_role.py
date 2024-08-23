@@ -2,7 +2,9 @@ from enum import Enum
 
 
 class SiteRole(str, Enum):
-    """Defines user roles."""
+    """
+    Defines user roles.
+    """
 
     #: Basic proofer. Can mark pages as yellow and upload simple projects.
     P1 = "p1"
@@ -14,16 +16,3 @@ class SiteRole(str, Enum):
     MODERATOR = "moderator"
     #: Administrator. Has full access to the database.
     ADMIN = "admin"
-
-
-class SitePageStatus(str, Enum):
-    """Defines page statuses."""
-
-    #: Needs more work
-    R0 = "reviewed-0"
-    #: Proofread once.
-    R1 = "reviewed-1"
-    #: Proofread twice.
-    R2 = "reviewed-2"
-    #: Not relevant.
-    SKIP = "skip"

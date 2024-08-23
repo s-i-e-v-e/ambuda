@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from unstd.data import List, Optional
 from ambuda.repository import DataSession
 
@@ -13,16 +12,16 @@ CREATE TABLE IF NOT EXISTS roles (
 );
 """
 
-INSERT = """
-INSERT INTO roles(name, created_at) VALUES(?, ?);
-"""
-
 DELETE = """
 DELETE FROM roles WHERE id = ?;
 """
 
 SELECT = """
 SELECT id, name, created_at FROM roles
+"""
+
+INSERT = """
+INSERT INTO roles(name, created_at) VALUES(?, ?);
 """
 
 class Role:
@@ -46,3 +45,30 @@ class Role:
         self.id = id
         self.name = name
         self.created_at = created_at
+
+    @staticmethod
+    def delete(ds: DataSession, id: int):
+        ds.exec(DELETE, (id,))
+
+    @staticmethod
+    def insert(ds: DataSession, name: str, time: datetime):
+        ds.exec(INSERT, (name, time))
+
+    @staticmethod
+    def __builder(xs):
+        return Role(xs[0], xs[1], datetime.fromisoformat(xs[2]))
+
+    @staticmethod
+    def select(ds: DataSession, id: int) -> "Optional[Role]":
+        return (ds.build(
+            Role.__builder,
+            f"{SELECT} WHERE id = ?",
+            (id,)
+        )).optional_head()
+
+    @staticmethod
+    def all(ds: DataSession) -> "List[Role]":
+        return (ds.build(
+            Role.__builder,
+            SELECT,
+        ))

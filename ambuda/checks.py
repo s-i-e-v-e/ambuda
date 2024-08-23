@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, inspect
 from sqlalchemy.engine import Engine
 from sqlalchemy.schema import Column
 
-from ambuda import consts, enums
+from ambuda import consts
 from ambuda import database as db
 from ambuda import queries as q
 from ambuda.models.base import Base

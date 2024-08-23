@@ -12,18 +12,17 @@ CREATE TABLE IF NOT EXISTS site_project_sponsorship (
 );
 """
 
-INSERT = """
-INSERT INTO site_project_sponsorship(sa_title, en_title, description, cost_inr) VALUES (?, ?, ?, ?);
+SELECT = """
+SELECT id, sa_title, en_title, description, cost_inr FROM site_project_sponsorship
 """
 
 DELETE = """
 DELETE FROM site_project_sponsorship WHERE id = ?;
 """
 
-SELECT = """
-SELECT id, sa_title, en_title, description, cost_inr FROM site_project_sponsorship
+INSERT = """
+INSERT INTO site_project_sponsorship(sa_title, en_title, description, cost_inr) VALUES (?, ?, ?, ?);
 """
-
 
 class ProjectSponsorship:
     """
@@ -49,12 +48,12 @@ class ProjectSponsorship:
         self.cost_inr = cost_inr
 
     @staticmethod
-    def insert(ds: DataSession, sa_title: str, en_title: str, description: str, cost_inr: int):
-        ds.exec(INSERT, (sa_title, en_title, description, cost_inr))
-
-    @staticmethod
     def delete(ds: DataSession, id: int):
         ds.exec(DELETE, (id,))
+
+    @staticmethod
+    def insert(ds: DataSession, sa_title: str, en_title: str, description: str, cost_inr: int):
+        ds.exec(INSERT, (sa_title, en_title, description, cost_inr))
 
     @staticmethod
     def __builder(xs):

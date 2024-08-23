@@ -11,16 +11,16 @@ CREATE TABLE IF NOT EXISTS dictionaries (
 );
 """
 
-INSERT = """
-INSERT INTO dictionaries(slug, title) VALUES (?, ?);
+SELECT = """
+SELECT id, slug, title FROM dictionaries
 """
 
-DELETE = """
+DELETE_BY_SLUG = """
 DELETE FROM dictionaries WHERE slug = ?;
 """
 
-SELECT = """
-SELECT id, slug, title FROM dictionaries
+INSERT = """
+INSERT INTO dictionaries(slug, title) VALUES (?, ?);
 """
 
 class Dictionary:
@@ -42,12 +42,12 @@ class Dictionary:
         self.title = title
 
     @staticmethod
-    def insert(ds: DataSession, slug: str, title: str):
-        ds.exec(INSERT, (slug, title))
+    def delete_by_slug(ds: DataSession, slug: str):
+        ds.exec(DELETE_BY_SLUG, (slug,))
 
     @staticmethod
-    def delete(ds: DataSession, slug: str):
-        ds.exec(DELETE, (slug,))
+    def insert(ds: DataSession, slug: str, title: str):
+        ds.exec(INSERT, (slug, title))
 
     @staticmethod
     def __builder(xs):

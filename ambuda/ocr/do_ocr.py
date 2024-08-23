@@ -4,7 +4,7 @@ from ambuda.std import id, executor
 from ambuda import consts
 from ambuda import database as db
 from ambuda import queries as q
-from ambuda.enums import SitePageStatus
+from ambuda.services import SitePageStatus
 
 from ambuda.utils.assets import get_page_image_filepath
 from ambuda.utils.revisions import add_revision

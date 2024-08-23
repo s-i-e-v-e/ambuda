@@ -6,8 +6,7 @@ print(sys.path)
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib import sqla
 from flask_login import current_user
-import ambuda.database as db
-import ambuda.queries as q
+
 
 
 class AmbudaIndexView(AdminIndexView):
@@ -92,7 +91,6 @@ class ContributorInfoView(ModeratorBaseView):
 
 
 def create_admin_manager(app):
-    session = q.get_session_class()
     admin = Admin(
         app,
         name="Ambuda",

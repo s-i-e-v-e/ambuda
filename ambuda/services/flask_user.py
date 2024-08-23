@@ -8,7 +8,6 @@ from flask_login import LoginManager
 from ambuda.services import DataSession, AmbudaUser, AmbudaAnonymousUser, UserService
 
 
-
 def _load_user(user_id: int) -> AmbudaUser | None:
     """Load a user from the database.
 

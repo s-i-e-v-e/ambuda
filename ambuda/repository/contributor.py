@@ -11,16 +11,20 @@ CREATE TABLE IF NOT EXISTS contributor_info (
 );
 """
 
-INSERT = """
-INSERT INTO contributor_info(name, title, description) VALUES (?, ?, ?);
+SELECT = """
+SELECT id, name, title, description FROM contributor_info
 """
 
 DELETE = """
 DELETE FROM contributor_info WHERE id = ?;
 """
 
-SELECT = """
-SELECT id, name, title, description FROM contributor_info
+INSERT = """
+INSERT INTO contributor_info(name, title, description) VALUES (?, ?, ?);
+"""
+
+UPDATE = """
+UPDATE contributor_info SET name = ?, title = ?, description = ? WHERE id = ?;
 """
 
 ORDER_BY = """
@@ -51,12 +55,16 @@ class ContributorInfo:
         self.description = description
 
     @staticmethod
+    def delete(ds: DataSession, id: int):
+        ds.exec(DELETE, (id,))
+
+    @staticmethod
     def insert(ds: DataSession, name: str, title: str, description: str):
         ds.exec(INSERT, (name, title, description))
 
     @staticmethod
-    def delete(ds: DataSession, id: int):
-        ds.exec(DELETE, (id,))
+    def update(ds: DataSession, id: int, name: str, title: str, description: str):
+        ds.exec(INSERT, (name, title, description, id))
 
     @staticmethod
     def __builder(xs):

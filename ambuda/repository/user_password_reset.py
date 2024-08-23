@@ -16,16 +16,16 @@ CREATE TABLE IF NOT EXISTS auth_password_reset_tokens (
 );
 """
 
+SELECT = """
+SELECT id, user_id, token_hash, is_active, created_at, used_at FROM auth_password_reset_tokens
+"""
+
 INSERT = """
 INSERT INTO auth_password_reset_tokens(user_id, token_hash, is_active, created_at, used_at) VALUES(?, ?, ?, ?, ?);
 """
 
 UPDATE = """
 UPDATE auth_password_reset_tokens SET is_active = ?, used_at = ? WHERE id = ?;
-"""
-
-SELECT = """
-SELECT id, user_id, token_hash, is_active, created_at, used_at FROM auth_password_reset_tokens
 """
 
 #: Tokens, newest first.
@@ -70,8 +70,8 @@ class PasswordResetToken:
         ds.exec(INSERT, (user_id, token_hash, True, datetime.now(), None))
 
     @staticmethod
-    def update(ds: DataSession, x: "PasswordResetToken"):
-        ds.exec(UPDATE, (x.is_active, x.used_at, x.id))
+    def update(ds: DataSession, id: int, time: datetime):
+        ds.exec(UPDATE, (False, time, id))
 
     @staticmethod
     def select(ds: DataSession, user_id: int) -> "Optional[PasswordResetToken]":

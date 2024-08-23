@@ -17,20 +17,20 @@ CREATE TABLE IF NOT EXISTS blog_posts (
 );
 """
 
-UPDATE = """
-UPDATE blog_posts SET author_id = ?, updated_at = ?, title = ?, slug = ?, content = ? WHERE id = ?;
-"""
-
-INSERT = """
-INSERT INTO blog_posts(author_id, created_at, updated_at, title, slug, content) VALUES (?, ?, ?, ?, ?, ?);
+SELECT = """
+SELECT id, author_id, created_at, updated_at, title, slug, content FROM blog_posts
 """
 
 DELETE = """
 DELETE FROM blog_posts WHERE id = ?;
 """
 
-SELECT = """
-SELECT id, author_id, created_at, updated_at, title, slug, content FROM blog_posts
+INSERT = """
+INSERT INTO blog_posts(author_id, created_at, updated_at, title, slug, content) VALUES (?, ?, ?, ?, ?, ?);
+"""
+
+UPDATE = """
+UPDATE blog_posts SET author_id = ?, updated_at = ?, title = ?, slug = ?, content = ? WHERE id = ?;
 """
 
 ORDER_BY = """
@@ -59,7 +59,6 @@ class BlogPost:
     #: The post content.
     content: str
 
-
     def __init__(self, id: int, author_id: int, created_at: datetime, updated_at: datetime, title: str, slug: str, content: str):
         self.id = id
         self.author_id = author_id
@@ -70,16 +69,16 @@ class BlogPost:
         self.content = content
 
     @staticmethod
-    def update(ds: DataSession, x: "BlogPost"):
-        ds.exec(UPDATE, (x.author_id, datetime.utcnow(), x.title, x.slug, x.content, x.id))
-
-    @staticmethod
-    def insert(ds: DataSession, author_id: int, title: str, slug: str, content: str):
-        ds.exec(INSERT, (author_id, datetime.utcnow(), datetime.utcnow(), title, slug, content))
-
-    @staticmethod
     def delete(ds: DataSession, id: int):
         ds.exec(DELETE, (id,))
+
+    @staticmethod
+    def insert(ds: DataSession, author_id: int, title: str, slug: str, content: str, time: datetime):
+        ds.exec(INSERT, (author_id, time, time, title, slug, content))
+
+    @staticmethod
+    def update(ds: DataSession, id: int, author_id: int, title: str, slug: str, content: str, time: datetime):
+        ds.exec(UPDATE, (author_id, time, title, slug, content, id))
 
     @staticmethod
     def __builder(xs):
